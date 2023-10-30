@@ -238,14 +238,6 @@ body::before {
   margin-top: 100px;
 }
 
-.header {
-  display: flex;
-  align-items: flex-start; /* Align items to the top */
-  justify-content: flex-start; /* Align content to the top */
-  margin: 0;
-  padding: 0;
-}
-
 .lato {
   font-family: 'Lato', sans-serif;
   font-size: 4rem;
@@ -262,18 +254,10 @@ body::before {
   font-family: 'LatoLight', sans-serif;
 }
 
-.lato-match {
-  margin-left: 20px; 
-}
-
 .white-line {
   border-top: 1px solid white;
   max-width: 250px;
   margin: 7px 0;
-}
-
-.content {
-  text-align: left; /* Left-align the content below */
 }
 
 p {
