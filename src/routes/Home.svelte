@@ -1,3 +1,18 @@
+<script>
+	import { Link } from 'svelte-routing';
+
+  let inputValue = '';
+
+  $: disabled = inputValue === '';
+
+  function search() {
+    if (inputValue !== '') {
+      console.log(`Searching for ${inputValue}`);
+    }
+  }
+</script>
+
+
 <main>
   <div class="background-image image1"></div>
   <div class="background-image image2"></div>
@@ -11,9 +26,18 @@
           <h1 class="lato-bold">ANIME</h1>
           <h1 class="lato">MATCH</h1>
           <hr class="white-line">
-          <p class="lato-light">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis.</p>
-          <input type="text" class="lato-light" placeholder="Enter MyAnimeList Username">
-      </div>
+          <p class="lato-light">Discover personalized anime recommendations tailored to your preferences through your MAL profile or manually. Let us be your guide to a world of captivating new anime experiences.</p>
+          <div class="input-wrapper">
+            <div class="input-container">
+              <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValue}>
+            </div>
+            <Link to="about">
+              <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={search}>
+                <i class="fa fa-search"></i>
+              </button>
+            </Link>
+          </div>
+        </div>
   </body>
 </main>
 
@@ -52,33 +76,35 @@ main {
 }
 
 .image1 {
-  background-image: url('/images/asuka.png');
+  background-image: url('/images/chain.png');
   animation: zoomAndFade1 50s infinite linear;
   opacity: 1;
 }
 
 .image2 {
-  background-image: url('/images/rei.png');
+  background-image: url('/images/gilga.jpg');
   animation: zoomAndFade2 50s infinite linear;
 }
 
 .image3 {
-  background-image: url('/images/city.png');
+  background-image: url('/images/fgo.jpg');
   animation: zoomAndFade3 50s infinite linear;
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
 }
 
 .image4 {
-  background-image: url('/images/rin.png');
+  background-image: url('/images/chill.jpg');
   animation: zoomAndFade4 50s infinite linear;
 }
 
 .image5 {
-  background-image: url('/images/goku.jpeg');
+  background-image: url('/images/soldier.png');
   animation: zoomAndFade5 50s infinite linear;
 }
 
 .image6 {
-  background-image: url('/images/chill.jpg');
+  background-image: url('/images/city.png');
   animation: zoomAndFade6 50s infinite linear;
 }
 
@@ -199,7 +225,6 @@ main {
   }
 }
 
-
 @font-face {
   font-family: 'Lato';
   src: url('/fonts/Lato-Black.ttf') format('truetype');
@@ -252,6 +277,7 @@ body::before {
 
 .lato-light {
   font-family: 'LatoLight', sans-serif;
+  color: white;
 }
 
 .white-line {
@@ -266,16 +292,64 @@ p {
 }
 
 input[type="text"] {
-  width: 300px;
+  flex: 1;
+  width: calc(100% - 45px);
   padding: 10px;
   margin: 20px 0;
-  height: 25px;
   border: none;
-  border-radius: 5px;
+  height: 100%;
+  border-radius: 5px 5px 0 0 0;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-  background: rgba(0, 0, 0, 0.4); /* Black background with 40% opacity */
-  border: 1px solid rgba(255, 255, 255, 0.7); /* White border with 70% opacity */
-  margin-top: 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   font-size: 20px;
 }
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  height: 50px; 
+  margin-top: 30px;
+}
+
+.input-container {
+  flex: 1;
+  display: flex;
+}
+
+.search-button {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  height: 93%;
+  width: 50px;
+  margin-right: 6px;
+  border-radius: 0 10px 10px 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.search-button:not([disabled]){
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.search-button:hover:not([disabled]) {
+  font-size: 1.25rem;
+  background: rgb(255, 255, 255, 0.8);
+  color: white; 
+}
+
+.search-button i {
+  color: white; 
+  -webkit-transition: font-size .2s;
+  -moz-transition: font-size .2s;
+  -o-transition: font-size .2s;
+  transition: font-size .2s;
+}
+
+.search-button:hover[disabled] {
+  font-size: 1;
+  background: rgba(0, 0, 0, 0.4); 
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
 </style>
