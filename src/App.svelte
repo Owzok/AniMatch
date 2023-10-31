@@ -4,7 +4,12 @@
 	import Credits from './routes/Credits.svelte';
 	import FAQ from './routes/FAQ.svelte';
 	import Home from './routes/Home.svelte';
-    import Stats from './routes/Stats.svelte';
+
+    import { inputValue } from './store';
+
+    let default_title = "Cowboy Bebop"
+
+    inputValue.subscribe((prev_val) => default_title = prev_val);
 </script>
 
 <Router>
@@ -19,7 +24,7 @@
     </nav>
     <div>
 		<Route path="/" component={Home}/>
-        <Route path="about" component={About} />
+        <Route path="/about" component={About} />
         <Route path="credits" component={Credits} />
         <Route path="faq" component={FAQ} />
         <!--<Route path="stats" component={Stats} />-->

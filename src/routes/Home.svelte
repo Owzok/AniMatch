@@ -1,13 +1,15 @@
 <script>
 	import { Link } from 'svelte-routing';
+  import { inputValue } from '../store';
 
-  let inputValue = '';
+  let inputValueValue = '';
 
-  $: disabled = inputValue === '';
+  $: disabled = inputValueValue === ''; 
 
   function search() {
-    if (inputValue !== '') {
-      console.log(`Searching for ${inputValue}`);
+    if (inputValueValue !== '') {
+      inputValue.set(inputValueValue); // Update the store with the inputValue
+      console.log(`Searching for ${inputValueValue}`);
     }
   }
 </script>
@@ -29,7 +31,7 @@
           <p class="lato-light">Discover personalized anime recommendations tailored to your preferences through your MAL profile or manually. Let us be your guide to a world of captivating new anime experiences.</p>
           <div class="input-wrapper">
             <div class="input-container">
-              <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValue}>
+              <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValueValue}>
             </div>
             <Link to="about">
               <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={search}>
