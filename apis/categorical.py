@@ -46,9 +46,9 @@ class Content_Categorical:
             distances = self.similarity[anime_index]
             anime_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x: x[1])[1:6]
 
-#            for i in anime_list:
-#                anime_name = self.cf.iloc[i[0]]['Name']
-#                print(f'{anime_name}: {i[1]}')  # Print anime name and similarity score
+        #    for i in anime_list:
+        #        anime_name = self.cf.iloc[i[0]]['Name']
+        #        print(f'{anime_name}: {i[1]}')  # Print anime name and similarity score
 
             recommended_anime_data = [(self.cf.iloc[i[0]]['MAL_ID'], i[1]) for i in anime_list]
 
@@ -56,3 +56,6 @@ class Content_Categorical:
         else:
             print("Anime not found in the dataset")
             return None
+        
+#cc = Content_Categorical()
+#cc.recommend("Dragon Ball")

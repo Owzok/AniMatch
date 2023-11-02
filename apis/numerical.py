@@ -29,11 +29,13 @@ class Content_Numerical:
 
         recommended_anime = similarities.sort_values(ascending=False)
 
-        #if display == True:
-        #    print(f"Top Recommended Anime for MAL_ID {self.df.loc[n_id]['Name']}:\n")
-        #    #print(recommended_anime.head(10))  # Print the top 10 recommendations
+        #print(f"Top Recommended Anime for MAL_ID {self.df.loc[n_id]['Name']}:\n")
+        #print(recommended_anime.head(10))  # Print the top 10 recommendations
 
-        #    for i in recommended_anime.iloc[:10].index:
-        #        print(self.df.loc[i]['Name'])
+        #for i in recommended_anime.iloc[:10].index:
+        #    print(self.df.loc[i]['Name'])
 
         return [(index, recommended_anime[index]) for index in recommended_anime.index]
+    
+#cn = Content_Numerical()
+#cn.recommend(223)

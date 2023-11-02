@@ -28,9 +28,9 @@ class ContentBasedRecommender:
 
         for anime_id, score in cate:
             if anime_id in combined:
-                combined[anime_id] += 0.001 * score
+                combined[anime_id] += 0.015 * score
             else:
-                combined[anime_id] = 0.001 * score
+                combined[anime_id] = 0.015 * score
 
         sorted_combined = sorted(combined.items(), key=lambda x: x[1], reverse=True)[:k]
 
@@ -41,3 +41,6 @@ class ContentBasedRecommender:
             recs.append(anime_name)
 
         return recs
+    
+#cb = ContentBasedRecommender()
+#print(cb.recommend("Dragon Ball", 20))

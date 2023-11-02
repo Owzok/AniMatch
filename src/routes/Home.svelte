@@ -55,6 +55,7 @@ body {
     align-items: center;
     position: relative;
     overflow: hidden;
+    text-decoration: none;
 }
 
 main {
