@@ -1,0 +1,121 @@
+<html>
+    <head>
+        <style>
+body{
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: black;
+}
+
+.info{
+    color: white;
+    position: absolute;
+    z-index: 4;
+    width: 550px;
+    margin-left: 80px;
+    margin-top: 70px;
+}
+
+.best{
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.desc{
+    font-weight: 100;
+    font-size: 18px;
+}
+
+button{
+    margin-top: 5px;
+    width: 100px;
+    height: 35px;
+}
+
+p{
+    margin: 0;
+}
+
+h3{
+    font-size: 14px;
+}
+
+h1{
+    font-size: 45px;
+    margin: 0;
+    margin-top: 10px;
+    line-height: 50px;
+    text-transform: uppercase;
+}
+
+ul{
+    list-style: none;
+    width: 100%;
+    padding: 0;
+    margin: 25px 0 25px 0;
+}
+
+li{
+    display: inline-block;
+    font-size: 18px;
+    margin-right: 30px;
+}
+
+.image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 70%; /* Adjust the image width as needed */
+  float: right;
+  margin-top: -60px;
+}
+
+.image-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,0,0,1) 25%, rgba(0,0,0,0.6685267857142857) 60%, rgba(0,0,0,0) 70%);
+  pointer-events: none;
+}
+
+.image-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 80%, black);
+  pointer-events: none;
+}
+
+        </style>
+    </head>
+    <body>
+        <div class="info">
+            <p class="best">Best Recommendation</p>
+            <h1>Mawaru <br> Penguindrum</h1>
+            <ul>
+                <li>24 Episodes</li>
+                <li>TV</li>
+                <li>Summer2011</li>
+                <li>Brain Base</li>
+                <li>R - 17</li>
+            </ul>
+            <p class="desc">
+                For the Takakura family, destiny is an ever-spinning wheel, pointing passionately in their direction with equal tides of joy and sorrow before ticking on to the next wishmaker. With their parents gone, twin brothers Kanba and Shouma live alone with their beloved little sister Himari, whose poor health cannot decline any further.
+            </p>
+            <h3>Avant Garde, Comedy, Drama, Mystery, Supernatural, Psychological</h3>
+            <button>MyAnimeList</button>
+        </div>
+        <div class="image-container">
+            <img src="image.jpg" alt="Your Image">
+        </div>
+    </body>
+</html>
