@@ -1,19 +1,51 @@
 <script>
-	import { Link } from 'svelte-routing';
-  import { inputValue } from '../store';
+	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigate function
+	import { inputValue } from '../store';
 
-  let inputValueValue = '';
+	let inputValueValue = '';
 
-  $: disabled = inputValueValue === ''; 
+	$: disabled = inputValueValue === '';
 
-  function search() {
-    if (inputValueValue !== '') {
-      inputValue.set(inputValueValue); // Update the store with the inputValue
-      console.log(`Searching for ${inputValueValue}`);
-    }
-  }
+	async function search() {
+		try {
+			const response = await fetch('http://127.0.0.1:5000/get_malid', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ title: inputValueValue }), // Replace with your API request payload
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+        const id = data.id
+				// console.log(data.id);
+
+				if (inputValueValue !== '') {
+					inputValue.set(id); // Update the store with the inputValue
+					console.log(`Searching for ${id} of ${inputValueValue}`);
+				}
+				
+				// Navigate to the "/about" route after logging the result
+				navigate('/about');
+			}
+		} catch (error) {
+			console.error('Error:', error);
+		}
+	}
 </script>
 
+<Router>
+  <nav class="navbar">
+    <div class="navbar-links">
+        <Link to="/"><p class=logo>AniMatch</p></Link>
+        <Link to="about"><p class="navbar-link">About</p></Link>
+        <Link to="about"><p class="navbar-link">Credits</p></Link>
+        <Link to="about"><p class="navbar-link">FAQ</p></Link>
+        <p class="navbar-link inactive">Stats</p>
+    </div>
+</nav>
+</Router>
 
 <main>
   <div class="background-image image1"></div>
@@ -33,17 +65,53 @@
             <div class="input-container">
               <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValueValue}>
             </div>
-            <Link to="about">
-              <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={search}>
-                <i class="fa fa-search"></i>
-              </button>
-            </Link>
+            <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={search}>
+              <i class="fa fa-search"></i>
+            </button>
           </div>
         </div>
   </body>
 </main>
 
 <style>
+
+nav{
+        position: absolute;
+        z-index: 5;
+        font-family: 'LatoLight', sans-serif;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      padding: 10px;
+    }
+  
+    .navbar-links {
+        text-decoration: none;
+        flex: 2;
+        display: flex;
+        justify-content: space-around;
+        margin-top: 30px;
+    }
+  
+    .navbar-link {
+        color: #fff;
+        font-size: 12px;
+        margin: 0 60px;
+    }
+
+    .inactive{
+        color: grey;
+    }
+  
+    .logo {
+        width: 30px;
+        height: 30px;
+        margin: 0 145px;
+        color: white;
+    }
 
 body {
     margin: 0;

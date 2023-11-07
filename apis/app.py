@@ -1,11 +1,14 @@
+# --- Flask ---
 from flask import Flask, request, jsonify
 from content import ContentBasedRecommender
-from flask_cors import CORS
-import time
-import base64
-from io import BytesIO
-import re
-import os
+from flask_cors import CORS, cross_origin
+
+import time                                 # time.sleep
+import base64                               # save image in base 64
+from io import BytesIO                      # save image
+import re                                   # regex 
+import os                                   # system operations
+# --- Webscrapping ---
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
@@ -15,8 +18,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options as ChromeOptions
-import requests
-from PIL import Image
+import requests                             # webscrapping
+from PIL import Image                       # save image from google
+import pandas as pd                         # read dataframe
+from difflib import SequenceMatcher         # search title by name
 
 app = Flask(__name__)
 CORS(app) 
@@ -30,7 +35,6 @@ os.makedirs(
 )
 
 chrome_options = ChromeOptions()
-chrome_options.add_argument("--headless")
 
 service = ChromeService(ChromeDriverManager().install())
 driver = webdriver.Chrome(
@@ -40,10 +44,19 @@ driver = webdriver.Chrome(
 
 SLEEP_TIME = 1
 
+df = pd.read_csv("anime.csv", index_col="MAL_ID")
+synopsis = pd.read_csv("anime_with_synopsis.csv", index_col="MAL_ID")
+
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+
 @app.route('/recommend', methods=['POST'])
+@cross_origin()
 def get_recommendations():
     data = request.json
-    title = data.get('title')
+    id = int(data.get('title'))
+    title = df.loc[id].Name
+
     k = data.get('k')
 
     if not title or k is None:
@@ -53,10 +66,50 @@ def get_recommendations():
     return jsonify({"recommendations": recommendations})
 
 
+@app.route('/get_malid', methods=['POST'])
+@cross_origin()
+def get_id():
+    data = request.json
+    title = data.get('title')
+    if title is None:
+        return jsonify({"error": "Invalid request. Make sure title are provided "}), 400
+
+    df['r'] = df.apply(lambda x: similar(x.Name, title), axis=1)
+    return jsonify({"id":str(df['r'].idxmax())})
+
+@app.route('/get_info', methods=['POST'])
+@cross_origin()
+def get_info():
+    data = request.json
+    id = int(data.get('id'))
+
+    def get_length_text(id):
+        x = synopsis.loc[id].sypnopsis.split(".")
+        m_len = 0
+        f_text = []
+        for i in range(len(x)):
+            if m_len > 360:
+                break
+            m_len += len(x[i])
+            f_text.append(x[i])
+            #print(m_len)
+        return " ".join(str(item) for item in f_text)    
+
+    desc = get_length_text(id)
+    fields = ['Name', 'Type', 'Episodes', 'Premiered', 'Studios', 'Rating']
+    filtered_data = df.loc[id, fields]
+    result_dict = filtered_data.to_dict()
+    result_dict['synopsis'] = desc
+    return jsonify(result_dict)
+
 @app.route('/scrape_image', methods=['POST'])
+@cross_origin()
 def scrape_image():
     data = request.json
-    search_query = data.get('search_query')
+    id = int(data.get('id'))
+    
+    search_query = df.loc[id].Name
+
     mal_id = data.get('id')
     #num_images = data.get('num_images')
 
@@ -71,11 +124,13 @@ def scrape_image():
             if response.status_code == 200:
                 image_data = BytesIO(response.content)
                 image = Image.open(image_data)
-                image.save(f"../public/download/{mal_id}.jpg")
+                image.save(f"../public/download/{id}.jpg")
 
                 print(f"Image saved as {mal_id}.jpg")
+                return 200
             else:
                 print(f"Failed to download image. Status code: {response.status_code}")
+                return response.status_code
 
         def save_base64(b64, title):
             try:
@@ -83,7 +138,7 @@ def scrape_image():
                 image_data = base64.b64decode(base64_data)
                 image_stream = BytesIO(image_data)
                 image = Image.open(image_stream)
-                image.save(f'../public/download/{search_query}.jpg', 'JPEG')
+                image.save(f'../public/download/{id}.jpg', 'JPEG')
                 print(f"Image saved as {search_query}.jpg")
                 image_stream.close()
             except:
@@ -125,7 +180,7 @@ def scrape_image():
             value='//*[@id="APjFqb"]'
         )
 
-        box.send_keys(search_query+" imagesize:1920x1080")
+        box.send_keys(search_query+" screencap imagesize:1920x1080 filetype:jpg")
         box.send_keys(Keys.ENTER)
         time.sleep(SLEEP_TIME)
 
@@ -167,6 +222,7 @@ def scrape_image():
                 # Hasta aca entro, busco y dio click en la primera imagen
                 #print("zzzz")
             time.sleep(SLEEP_TIME)
+            time.sleep(SLEEP_TIME)
                 #time.sleep(100000)
 
             actual_imgs = driver.find_element(
@@ -183,8 +239,11 @@ def scrape_image():
             img_url = x.get_attribute("src")
             if img_url[:5] == 'https':
                 print("GG")
-                save_image(img_url)
-                return
+                
+                if save_image(img_url) == 200:
+                    return
+                else:
+                    continue
 
     try:
         #download_google_images(search_query, num_images)
