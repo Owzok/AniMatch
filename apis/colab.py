@@ -19,9 +19,22 @@ from lightfm.data import Dataset
 NUM_COMPONENTS = 30
 MODEL_LOSS = "warp"
 
+"""
+TO DO:
+- add second model to AB Test al momento de hibridizar
+- pruebas brindando animes en los que no esten en el dataset de train mappeado para ver que no den error
+- explicar operaciones con embeds
+- pruebas con perfiles de usuario que de mart
+- adaptador de data para que nos den anime y rating, y ya le asignemos un ID al user y saquemos ids de animes
+
+
+- HIBRYDIZATION! (tomar en cuenta que cuando no hayan animes que detecte el colaborative
+                    podria ser que el content based lo pueda recomendar)
+"""
+
 class ColaborativeRecommender:
     def __init__(self):
-        with open("./model_warp_1.pkl", 'rb') as model_file:
+        with open("./model_"+MODEL_LOSS+"_1.pkl", 'rb') as model_file:
             self.model = pickle.load(model_file)
         with open("./dataset_save.pkl", 'rb') as dataset_file:
             self.df = pickle.load(dataset_file)
@@ -41,6 +54,7 @@ class ColaborativeRecommender:
     def get_anime_originalID(self, id_to_inverse):
         return self.inv_dict.get(id_to_inverse, None)
 
+    #Para correr y ver imagenes de manera rapida
     def get_lst_images(lst_recommend):
         url = "https://myanimelist.net/anime/"
         lst_images = []
@@ -142,9 +156,6 @@ class ColaborativeRecommender:
 
         return nuevo_df, lst_animes_ratings
     
-#cb = ContentBasedRecommender()
-#print(cb.recommend("Dragon Ball", 20))
-
 cl = ColaborativeRecommender()
 data_new_user = pd.read_csv("./new_user.csv")
 titles, id_ratings = cl.recommend(data_new_user)
