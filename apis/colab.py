@@ -129,15 +129,18 @@ class ColaborativeRecommender:
 
     def predict_N_best_recommendations(self, map_watched, projected_user_embedding, N=10):
         predicted_ratings = np.dot(projected_user_embedding, self.item_embeddings.T) + self.item_biases
-        top_N_indices = np.argsort(predicted_ratings)[0][::-1]
-        
+        predicted_ratings = predicted_ratings[0]
+        top_N_indices = np.argsort(predicted_ratings)[::-1]
+    
         lst_top_recommendations = []
         lst_animes_ratings = []
-        for id, rating in zip(top_N_indices, predicted_ratings[0]):
-            if map_watched.get(id, None) != None:
-                lst_top_recommendations.append(self.get_anime_originalID(id))
-                lst_animes_ratings.append((self.get_anime_originalID(id), rating))
-        
+        for id, rating in zip(top_N_indices, predicted_ratings[top_N_indices]):
+            watched = map_watched.get(id, None)
+            if watched == None:
+                title_original = self.anime_titles[self.anime_titles["Id"] == self.get_anime_originalID(id)]
+                if len(title_original):
+                    lst_top_recommendations.append(self.get_anime_originalID(id))
+                    lst_animes_ratings.append((self.get_anime_originalID(id), rating))
         return lst_top_recommendations[:N], lst_animes_ratings[:N]
 
     def recommend(self, data_new_user, K_to_recommend=10):
@@ -160,8 +163,10 @@ cl = ColaborativeRecommender()
 data_new_user = pd.read_csv("./new_user.csv")
 titles, id_ratings = cl.recommend(data_new_user, 200)
 
-print(id_ratings)
+#print(id_ratings)
 
 for elem in range(len(id_ratings)):
     print("Anime: ", titles[elem])
     #print("con score ", id_ratings[elem][1])
+
+print(len(titles))
