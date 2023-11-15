@@ -5,7 +5,7 @@
   let title_val = "";
   let imageExists = false;
   let imageSrc = null;
-  let mal_images = null;
+  let mal_images = [];
 
   //const unsubscribe = inputValue.subscribe(value => {
   //  title_val = value
@@ -45,6 +45,7 @@
 
         console.log("First anime_id:", firstAnimeId);
         console.log("Rest of the anime_image_urls:", restOfUrls);
+        console.log('mal_images:', mal_images);
         retrieveInfo();
         checkImageExists();
         //generateImage();
@@ -59,15 +60,15 @@
     }
   }
 
-  function checkImageExists() {
-    try {
-      const response = fetch(`/download/${title_val}.jpg`);
-      imageExists = response.ok;
+  async function checkImageExists() {
+  try {
+    const response = await fetch(`/download/${title_val}.jpg`);
+    imageExists = response.ok;
 
-      if (imageExists) {
-        imageSrc = `/download/${title_val}.jpg`;
-      }
-    } catch (error) {
+    if (imageExists) {
+      imageSrc = `/download/${title_val}.jpg`;
+    }
+  } catch (error) {
       console.error('Error:', error);
     }
   }
@@ -80,64 +81,62 @@
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ id: title_val }),
-      });
+    });
 
-      if (response.ok) {
-        const data = response.json();
-        title = data.Name;
-        episodes = data.Episodes;
-        premiere = data.Premiered;
-        studio = data.Studios;
-        type = data.Type;
-        desc = data.synopsis;
-        rating = data.Rating;
-
-      } else {
-        console.error('Failed to fetch data');
-      }
-    } catch (error) {
-      console.error('Error:', error);
+    if (response.ok) {
+      const data = await response.json();
+      title = data.Name;
+      episodes = data.Episodes;
+      premiere = data.Premiered;
+      studio = data.Studios;
+      type = data.Type;
+      desc = data.synopsis;
+      rating = data.Rating;
+    } else {
+      console.error('Failed to fetch data');
     }
+  } catch (error) {
+    console.error('Error:', error);
   }
+}
 
-  function generateImage() {
-    const api_url = 'http://localhost:5000/scrape_image';  // Update with your actual API endpoint
+async function generateImage() {
+  const api_url = 'http://localhost:5000/scrape_image';
 
-    const response = fetch(`/download/${title_val}.jpg`);
+  try {
+    const response = await fetch(`/download/${title_val}.jpg`);
     imageExists = response.ok;
 
     if (imageExists) {
       imageSrc = `/download/${title_val}.jpg`;
     } else {
-      try {
-        const response = fetch(api_url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ id: title_val }),
-        });
+      const response = await fetch(api_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: title_val }),
+      });
 
-        if (response.ok) {
-          console.log("Answered!")
-          const responseData = response.json();
-          if (responseData.success) {
-            // Image was generated successfully
-            imageExists = true;
-            imageSrc = `/download/${title_val}.jpg`;
-            console.log(imageExists);
-          } else {
-            // Image generation failed
-            console.error('API request was not successful:', responseData.error);
-          }
+      if (response.ok) {
+        console.log("Answered!");
+        const responseData = await response.json();
+
+        if (responseData.success) {
+          imageExists = true;
+          imageSrc = `/download/${title_val}.jpg`;
+          console.log(imageExists);
         } else {
-          console.error('API request failed with status code:', response.status);
+          console.error('API request was not successful:', responseData.error);
         }
-      } catch (error) {
-        console.error('Error:', error);
+      } else {
+        console.error('API request failed with status code:', response.status);
       }
     }
+  } catch (error) {
+    console.error('Error:', error);
   }
+}
 
   // Call the fetchTodos function when the component is mounted
   import { onMount } from 'svelte';
@@ -148,6 +147,7 @@
       document.body.style.overflowY = 'auto';
     };
   })
+
 </script>
 
 <main>
@@ -196,19 +196,16 @@
             </div>
         </div>
         <div class="recs">
-            <div class="image-row">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-            </div>
-            <div class="image-row-s">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-                <img src="./108439.jpg" alt="">
-            </div>
+          <div class="image-row">
+            {#each mal_images.slice(0, 4) as url (url)}
+              <img src={url} alt="">
+            {/each}
+          </div>
+          <div class="image-row-s">
+            {#each mal_images.slice(4) as url (url)}
+              <img src={url} alt="">
+            {/each}
+          </div>
         </div>
 </main>
 
