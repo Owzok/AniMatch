@@ -4,7 +4,7 @@
 body{
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
     background-color: black;
 }
 
@@ -95,6 +95,78 @@ li{
   pointer-events: none;
 }
 
+.recs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+.image-row-s {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+.image-row img {
+    height: 250px;
+    margin-left: 130px;
+    margin-bottom: 70px;
+    z-index: 3;
+    transition: .3s;
+}
+
+.image-row img:hover {
+    height: 275px;
+    margin-bottom: 20px;
+}
+
+.image-row-s img {
+    height: 200px;
+    margin-left: 130px;
+    z-index: 3;
+    transition: .3s;
+}
+
+.image-row-s img:hover{
+    height: 225px;
+}
+
+.number_Recs {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    margin-top: 25px;
+}
+
+.number-row{
+    margin-left: 58px;
+}
+
+.number-row img{
+    height: 225px;
+    margin-left: 53px;
+    z-index: 0;
+}
+
+h2{
+    color: white;
+    margin-left: 80px;
+    margin-bottom: 40px;
+}
+
+.number-row-s img{
+    height: 200px;
+    margin-top: 320px;
+    z-index: 0;
+    margin-left: 58px;
+}
+
 </style>
     </head>
     <body>
@@ -116,6 +188,39 @@ li{
         </div>
         <div class="image-container">
             <img src="image.jpg" alt="Your Image">
+        </div>
+        <h2>Best recommendations for you</h2>
+        <div class="number_Recs">
+            <div class="number-row">
+                <img src="2.png" alt="2">
+                <img src="3.png" alt="3">
+                <img src="4.png" alt="4">
+                <img src="5.png" alt="5">
+            </div>
+        </div>
+        <div class="number_Recs">
+            <div class="number-row-s">
+                <img src="6.png" alt="6">
+                <img src="7.png" alt="7">
+                <img src="8.png" alt="8">
+                <img src="9.png" alt="9">
+                <img src="10.png" alt="10">
+            </div>
+        </div>
+        <div class="recs">
+            <div class="image-row">
+                <img src="108439.jpg" alt="Image 1">
+                <img src="108439.jpg" alt="Image 2">
+                <img src="108439.jpg" alt="Image 3">
+                <img src="108439.jpg" alt="Image 4">
+            </div>
+            <div class="image-row-s">
+                <img src="108439.jpg" alt="Image 5">
+                <img src="108439.jpg" alt="Image 6">
+                <img src="108439.jpg" alt="Image 7">
+                <img src="108439.jpg" alt="Image 8">
+                <img src="108439.jpg" alt="Image 9">
+            </div>
         </div>
     </body>
 </html>

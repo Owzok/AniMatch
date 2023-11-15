@@ -5,10 +5,11 @@
   let title_val = "";
   let imageExists = false;
   let imageSrc = null;
+  let mal_images = null;
 
-  const unsubscribe = inputValue.subscribe(value => {
-    title_val = value
-  });
+  //const unsubscribe = inputValue.subscribe(value => {
+  //  title_val = value
+  //});
 
   let title = "";
   let episodes = "";
@@ -19,18 +20,37 @@
   let desc = "";
 
   async function fetchTodos() {
-    try {
-      const response = await fetch('http://127.0.0.1:5000/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: title_val, k: 10 }), // Replace with your API request payload
-      });
+  try {
+    const response = await fetch('http://127.0.0.1:5000/recommend', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title: title_val, k: 10 }),
+    });
 
-      if (response.ok) {
-        const json = await response.json();
-        todos = json;
+    if (response.ok) {
+      // Await the response.json() method to get the actual JSON data
+      const json = await response.json();
+
+      // Check if the 'results' property exists in the response
+      if ('results' in json) {
+        const parsedResults = JSON.parse(json.results);
+
+        const firstAnimeId = parsedResults[0].anime_id;
+        const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
+
+        title_val = firstAnimeId;
+        mal_images = restOfUrls;
+
+        console.log("First anime_id:", firstAnimeId);
+        console.log("Rest of the anime_image_urls:", restOfUrls);
+        retrieveInfo();
+        checkImageExists();
+        generateImage();
+      } else {
+        console.error('Results property not found in the response:', json);
+      }
       } else {
         console.error('Failed to fetch data');
       }
@@ -39,9 +59,9 @@
     }
   }
 
-  async function checkImageExists() {
+  function checkImageExists() {
     try {
-      const response = await fetch(`/download/${title_val}.jpg`);
+      const response = fetch(`/download/${title_val}.jpg`);
       imageExists = response.ok;
 
       if (imageExists) {
@@ -52,9 +72,9 @@
     }
   }
 
-  async function retrieveInfo() {
+  function retrieveInfo() {
     try {
-      const response = await fetch('http://127.0.0.1:5000/get_info', {
+      const response = fetch('http://127.0.0.1:5000/get_info', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +83,7 @@
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = response.json();
         title = data.Name;
         episodes = data.Episodes;
         premiere = data.Premiered;
@@ -80,17 +100,17 @@
     }
   }
 
-  async function generateImage() {
+  function generateImage() {
     const api_url = 'http://localhost:5000/scrape_image';  // Update with your actual API endpoint
 
-    const response = await fetch(`/download/${title_val}.jpg`);
+    const response = fetch(`/download/${title_val}.jpg`);
     imageExists = response.ok;
 
     if (imageExists) {
       imageSrc = `/download/${title_val}.jpg`;
     } else {
       try {
-        const response = await fetch(api_url, {
+        const response = fetch(api_url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -100,7 +120,7 @@
 
         if (response.ok) {
           console.log("Answered!")
-          const responseData = await response.json();
+          const responseData = response.json();
           if (responseData.success) {
             // Image was generated successfully
             imageExists = true;
@@ -122,10 +142,11 @@
   // Call the fetchTodos function when the component is mounted
   import { onMount } from 'svelte';
   onMount(() => {
-    retrieveInfo();
+    document.body.style.overflowY = 'visible';
     fetchTodos();
-    checkImageExists();
-    generateImage();
+    return () => {
+      document.body.style.overflowY = 'auto';
+    };
   })
 </script>
 
@@ -154,9 +175,41 @@
       {/if}
   </div>
   <div>
-    <h2>Recommendations:</h2>
+    <h2>Best recommendations for you:</h2>
     <pre>{JSON.stringify(todos, null, 2)}</pre>
   </div>
+        <div class="number_Recs">
+            <div class="number-row">
+                <img src="./icons/2.png" alt="2">
+                <img src="./icons/3.png" alt="3">
+                <img src="./icons/4.png" alt="4">
+                <img src="./icons/5.png" alt="5">
+            </div>
+        </div>
+        <div class="number_Recs">
+            <div class="number-row-s">
+                <img src="./icons/6.png" alt="6">
+                <img src="./icons/7.png" alt="7">
+                <img src="./icons/8.png" alt="8">
+                <img src="./icons/9.png" alt="9">
+                <img src="./icons/10.png" alt="10">
+            </div>
+        </div>
+        <div class="recs">
+            <div class="image-row">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+            </div>
+            <div class="image-row-s">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+            </div>
+        </div>
 </main>
 
 <style>
@@ -183,7 +236,7 @@
   main{
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      overflow-x: hidden;
       background-color: black;
   }
 
@@ -284,4 +337,77 @@
   pre{
     color: white;
   }
+
+  .recs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+.image-row-s {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+.image-row img {
+    height: 250px;
+    margin-left: 130px;
+    margin-bottom: 70px;
+    z-index: 3;
+    transition: .3s;
+}
+
+.image-row img:hover {
+    height: 275px;
+    margin-bottom: 20px;
+}
+
+.image-row-s img {
+    height: 200px;
+    margin-left: 130px;
+    z-index: 3;
+    transition: .3s;
+}
+
+.image-row-s img:hover{
+    height: 225px;
+}
+
+.number_Recs {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    margin-top: 25px;
+}
+
+.number-row{
+    margin-left: 58px;
+}
+
+.number-row img{
+    height: 225px;
+    margin-left: 53px;
+    z-index: 0;
+}
+
+h2{
+    color: white;
+    margin-left: 80px;
+    margin-bottom: 40px;
+}
+
+.number-row-s img{
+    height: 200px;
+    margin-top: 320px;
+    z-index: 0;
+    margin-left: 58px;
+}
+
 </style>

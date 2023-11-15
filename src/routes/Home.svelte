@@ -1,6 +1,7 @@
 <script>
 	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigate function
 	import { inputValue } from '../store';
+  import { onMount } from 'svelte';
 
 	let inputValueValue = '';
 
@@ -33,6 +34,14 @@
 			console.error('Error:', error);
 		}
 	}
+
+  onMount(() => {
+    document.body.style.overflowY = 'hidden';
+
+    return () => {
+      document.body.style.overflowY = 'auto';
+    };
+  });
 </script>
 
 <Router>
@@ -74,7 +83,6 @@
 </main>
 
 <style>
-
 nav{
         position: absolute;
         z-index: 5;

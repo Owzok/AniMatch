@@ -168,15 +168,12 @@ class ColaborativeRecommender:
 
         return anime_titles, lst_animes_ratings, lst_id_url
     
-cl = ColaborativeRecommender()
-data_new_user = pd.read_csv("./new_user.csv")
-titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
+#cl = ColaborativeRecommender()
+#data_new_user = pd.read_csv("./new_user.csv")
+#titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
 
-#print(id_ratings)
+#print(lst_id_url)
 
-for elem in range(len(id_ratings)):
-    print("Anime: ", titles[elem])
+#for elem in range(len(id_ratings)):
+    #print("Anime: ", titles[elem])
     #print("con score ", id_ratings[elem][1])
-
-
-print(lst_id_url)
