@@ -1,6 +1,6 @@
 # --- Flask ---
 from flask import Flask, request, jsonify
-from content import ContentBasedRecommender
+from model_content import ContentBasedRecommender
 from flask_cors import CORS, cross_origin
 
 import time                                 # time.sleep
@@ -34,18 +34,21 @@ os.makedirs(
     exist_ok=True
 )
 
-chrome_options = ChromeOptions()
+try: 
+    chrome_options = ChromeOptions()
 
-service = ChromeService(ChromeDriverManager().install())
-driver = webdriver.Chrome(
-    service=service,
-    options=chrome_options
-)
+    service = ChromeService(ChromeDriverManager().install())
+    driver = webdriver.Chrome(
+        service=service,
+        options=chrome_options
+    )
+except:
+    print("Machine is not Windows, cannot do webscraping !")
 
 SLEEP_TIME = 1
 
-df = pd.read_csv("anime.csv", index_col="MAL_ID")
-synopsis = pd.read_csv("anime_with_synopsis.csv", index_col="MAL_ID")
+df = pd.read_csv("./data/anime.csv", index_col="MAL_ID")
+synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()

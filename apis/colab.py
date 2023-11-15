@@ -158,7 +158,9 @@ class ColaborativeRecommender:
     
 cl = ColaborativeRecommender()
 data_new_user = pd.read_csv("./new_user.csv")
-titles, id_ratings = cl.recommend(data_new_user)
+titles, id_ratings = cl.recommend(data_new_user, 200)
+
+print(id_ratings)
 
 for elem in range(len(id_ratings)):
     print("Anime: ", titles[elem])

@@ -53,7 +53,8 @@ class ContentBasedRecommender:
             if anime_id in combined:
                 combined[anime_id] += 0.05 * score
 
-        sorted_combined = sorted(combined.items(), key=lambda x: x[1], reverse=True)[:k]
+        sorted_combined = sorted(combined.items(), key=lambda x: x[1], reverse=True)[1:]
+        return sorted_combined
         #print(sorted_combined)
         recs = []
 
@@ -78,8 +79,6 @@ class ContentBasedRecommender:
             #for sanime_id, score in stud:
             #    if sanime_id == anime_id:
             #        print("Studio",score)
-
-            
 
         return recs
     
