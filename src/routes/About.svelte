@@ -47,7 +47,7 @@
         console.log("Rest of the anime_image_urls:", restOfUrls);
         retrieveInfo();
         checkImageExists();
-        generateImage();
+        //generateImage();
       } else {
         console.error('Results property not found in the response:', json);
       }
@@ -72,14 +72,14 @@
     }
   }
 
-  function retrieveInfo() {
-    try {
-      const response = fetch('http://127.0.0.1:5000/get_info', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: title_val }), // Replace with your API request payload
+  async function retrieveInfo() {
+  try {
+    const response = await fetch('http://127.0.0.1:5000/get_info', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: title_val }),
       });
 
       if (response.ok) {
