@@ -122,10 +122,14 @@
   // Call the fetchTodos function when the component is mounted
   import { onMount } from 'svelte';
   onMount(() => {
+    document.body.style.overflowY = 'visible';
     retrieveInfo();
     fetchTodos();
     checkImageExists();
     generateImage();
+    return () => {
+      document.body.style.overflowY = 'auto';
+    };
   })
 </script>
 
@@ -154,9 +158,41 @@
       {/if}
   </div>
   <div>
-    <h2>Recommendations:</h2>
+    <h2>Best recommendations for you:</h2>
     <pre>{JSON.stringify(todos, null, 2)}</pre>
   </div>
+        <div class="number_Recs">
+            <div class="number-row">
+                <img src="./icons/2.png" alt="2">
+                <img src="./icons/3.png" alt="3">
+                <img src="./icons/4.png" alt="4">
+                <img src="./icons/5.png" alt="5">
+            </div>
+        </div>
+        <div class="number_Recs">
+            <div class="number-row-s">
+                <img src="./icons/6.png" alt="6">
+                <img src="./icons/7.png" alt="7">
+                <img src="./icons/8.png" alt="8">
+                <img src="./icons/9.png" alt="9">
+                <img src="./icons/10.png" alt="10">
+            </div>
+        </div>
+        <div class="recs">
+            <div class="image-row">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+            </div>
+            <div class="image-row-s">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+                <img src="./108439.jpg" alt="">
+            </div>
+        </div>
 </main>
 
 <style>
@@ -183,7 +219,7 @@
   main{
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      overflow-x: hidden;
       background-color: black;
   }
 
@@ -284,4 +320,77 @@
   pre{
     color: white;
   }
+
+  .recs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+.image-row-s {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+.image-row img {
+    height: 250px;
+    margin-left: 130px;
+    margin-bottom: 70px;
+    z-index: 3;
+    transition: .3s;
+}
+
+.image-row img:hover {
+    height: 275px;
+    margin-bottom: 20px;
+}
+
+.image-row-s img {
+    height: 200px;
+    margin-left: 130px;
+    z-index: 3;
+    transition: .3s;
+}
+
+.image-row-s img:hover{
+    height: 225px;
+}
+
+.number_Recs {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    margin-top: 25px;
+}
+
+.number-row{
+    margin-left: 58px;
+}
+
+.number-row img{
+    height: 225px;
+    margin-left: 53px;
+    z-index: 0;
+}
+
+h2{
+    color: white;
+    margin-left: 80px;
+    margin-bottom: 40px;
+}
+
+.number-row-s img{
+    height: 200px;
+    margin-top: 320px;
+    z-index: 0;
+    margin-left: 58px;
+}
+
 </style>
