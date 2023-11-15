@@ -15,7 +15,7 @@ from lightfm import LightFM
 import pandas as pd
 from scipy import sparse
 from lightfm.data import Dataset
-
+import time 
 NUM_COMPONENTS = 30
 MODEL_LOSS = "warp"
 
@@ -55,20 +55,21 @@ class ColaborativeRecommender:
         return self.inv_dict.get(id_to_inverse, None)
 
     #Para correr y ver imagenes de manera rapida
-    def get_lst_images(lst_recommend):
+    def get_lst_images(self, lst_recommend):
         url = "https://myanimelist.net/anime/"
         lst_images = []
         for anime in lst_recommend:
             response = requests.get(url+str(anime))
             soup = BeautifulSoup(response.text, 'html.parser')
-            img_tag = soup.find('img', {'data-src': True})    
+            div_tag = soup.find('div', {'class': 'leftside'})
+            img_tag = div_tag.find('img') if div_tag else None
             if img_tag:
                 image_url = img_tag['data-src']
                 lst_images.append(image_url)
         
         return lst_images
 
-    def try_outs(lst_images, lst_recommend):
+    def try_outs(self, lst_images, lst_recommend):
         num_images = len(lst_images)
         images_per_row = 5
         num_rows = (num_images + images_per_row - 1) // images_per_row
@@ -155,13 +156,20 @@ class ColaborativeRecommender:
 
         #self.try_outs(self.get_lst_images(lst_top_recommendations), lst_top_recommendations)
         ids_en_df = self.anime_titles[self.anime_titles['Id'].isin(lst_top_recommendations)]
-        nuevo_df = pd.DataFrame(ids_en_df, columns=['Id', "Title"]).set_index('Id').reindex(lst_top_recommendations)["Title"].tolist()
+        nuevo_df =  pd.DataFrame(ids_en_df, columns=['Id', "Title"]).set_index('Id').reindex(lst_top_recommendations)
+        anime_titles =nuevo_df["Title"].tolist()
+        anime_id =nuevo_df.index
 
-        return nuevo_df, lst_animes_ratings
+        lst_id_url = []
+        lst_url = self.get_lst_images(anime_id)
+        for x in range(len(anime_id)):
+            lst_id_url.append((anime_id[x], lst_url[x]))
+
+        return anime_titles, lst_animes_ratings, lst_id_url
     
 cl = ColaborativeRecommender()
 data_new_user = pd.read_csv("./new_user.csv")
-titles, id_ratings = cl.recommend(data_new_user, 200)
+titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
 
 #print(id_ratings)
 
@@ -169,4 +177,4 @@ for elem in range(len(id_ratings)):
     print("Anime: ", titles[elem])
     #print("con score ", id_ratings[elem][1])
 
-print(len(titles))
+print(lst_id_url)
