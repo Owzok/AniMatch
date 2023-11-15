@@ -15,7 +15,8 @@ from lightfm import LightFM
 import pandas as pd
 from scipy import sparse
 from lightfm.data import Dataset
-import time 
+import json
+
 NUM_COMPONENTS = 30
 MODEL_LOSS = "warp"
 
@@ -176,5 +177,6 @@ titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
 for elem in range(len(id_ratings)):
     print("Anime: ", titles[elem])
     #print("con score ", id_ratings[elem][1])
+
 
 print(lst_id_url)
