@@ -5,10 +5,11 @@
   let title_val = "";
   let imageExists = false;
   let imageSrc = null;
+  let mal_images = null;
 
-  const unsubscribe = inputValue.subscribe(value => {
-    title_val = value
-  });
+  //const unsubscribe = inputValue.subscribe(value => {
+  //  title_val = value
+  //});
 
   let title = "";
   let episodes = "";
@@ -19,18 +20,37 @@
   let desc = "";
 
   async function fetchTodos() {
-    try {
-      const response = await fetch('http://127.0.0.1:5000/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: title_val, k: 10 }), // Replace with your API request payload
-      });
+  try {
+    const response = await fetch('http://127.0.0.1:5000/recommend', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title: title_val, k: 10 }),
+    });
 
-      if (response.ok) {
-        const json = await response.json();
-        todos = json;
+    if (response.ok) {
+      // Await the response.json() method to get the actual JSON data
+      const json = await response.json();
+
+      // Check if the 'results' property exists in the response
+      if ('results' in json) {
+        const parsedResults = JSON.parse(json.results);
+
+        const firstAnimeId = parsedResults[0].anime_id;
+        const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
+
+        title_val = firstAnimeId;
+        mal_images = restOfUrls;
+
+        console.log("First anime_id:", firstAnimeId);
+        console.log("Rest of the anime_image_urls:", restOfUrls);
+        retrieveInfo();
+        checkImageExists();
+        generateImage();
+      } else {
+        console.error('Results property not found in the response:', json);
+      }
       } else {
         console.error('Failed to fetch data');
       }
@@ -39,9 +59,9 @@
     }
   }
 
-  async function checkImageExists() {
+  function checkImageExists() {
     try {
-      const response = await fetch(`/download/${title_val}.jpg`);
+      const response = fetch(`/download/${title_val}.jpg`);
       imageExists = response.ok;
 
       if (imageExists) {
@@ -52,9 +72,9 @@
     }
   }
 
-  async function retrieveInfo() {
+  function retrieveInfo() {
     try {
-      const response = await fetch('http://127.0.0.1:5000/get_info', {
+      const response = fetch('http://127.0.0.1:5000/get_info', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +83,7 @@
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data = response.json();
         title = data.Name;
         episodes = data.Episodes;
         premiere = data.Premiered;
@@ -80,17 +100,17 @@
     }
   }
 
-  async function generateImage() {
+  function generateImage() {
     const api_url = 'http://localhost:5000/scrape_image';  // Update with your actual API endpoint
 
-    const response = await fetch(`/download/${title_val}.jpg`);
+    const response = fetch(`/download/${title_val}.jpg`);
     imageExists = response.ok;
 
     if (imageExists) {
       imageSrc = `/download/${title_val}.jpg`;
     } else {
       try {
-        const response = await fetch(api_url, {
+        const response = fetch(api_url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -100,7 +120,7 @@
 
         if (response.ok) {
           console.log("Answered!")
-          const responseData = await response.json();
+          const responseData = response.json();
           if (responseData.success) {
             // Image was generated successfully
             imageExists = true;
@@ -123,10 +143,7 @@
   import { onMount } from 'svelte';
   onMount(() => {
     document.body.style.overflowY = 'visible';
-    retrieveInfo();
     fetchTodos();
-    checkImageExists();
-    generateImage();
     return () => {
       document.body.style.overflowY = 'auto';
     };

@@ -82,5 +82,5 @@ class ContentBasedRecommender:
 
         return recs
     
-cb = ContentBasedRecommender()
-print(cb.recommend("Bungou Stray Dogs", 10))
+#cb = ContentBasedRecommender()
+#print(cb.recommend("Bungou Stray Dogs", 10))

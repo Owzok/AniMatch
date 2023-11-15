@@ -1,8 +1,10 @@
 # --- Flask ---
 from flask import Flask, request, jsonify
 from model_content import ContentBasedRecommender
+from colab import ColaborativeRecommender
 from flask_cors import CORS, cross_origin
 
+import json
 import time                                 # time.sleep
 import base64                               # save image in base 64
 from io import BytesIO                      # save image
@@ -25,7 +27,8 @@ from difflib import SequenceMatcher         # search title by name
 
 app = Flask(__name__)
 CORS(app) 
-cb = ContentBasedRecommender()
+#cb = ContentBasedRecommender()
+cf = ColaborativeRecommender()
 
 cwd = os.getcwd()
 IMAGE_FOLDER = '../public/download/'
@@ -49,6 +52,7 @@ SLEEP_TIME = 1
 
 df = pd.read_csv("./data/anime.csv", index_col="MAL_ID")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
+data_new_user = pd.read_csv("./new_user.csv")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -56,6 +60,13 @@ def similar(a, b):
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
 def get_recommendations():
+    titles, id_ratings, lst_id_url = cf.recommend(data_new_user, 10)
+
+    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url} for anime_id, anime_image_url in lst_id_url]
+    json_data = json.dumps(jsonifiable_data)
+
+    return jsonify({"results": json_data})
+
     data = request.json
     id = int(data.get('title'))
     title = df.loc[id].Name
@@ -67,7 +78,6 @@ def get_recommendations():
 
     recommendations = cb.recommend(title, k)
     return jsonify({"recommendations": recommendations})
-
 
 @app.route('/get_malid', methods=['POST'])
 @cross_origin()
@@ -81,10 +91,11 @@ def get_id():
     return jsonify({"id":str(df['r'].idxmax())})
 
 @app.route('/get_info', methods=['POST'])
-@cross_origin()
 def get_info():
     data = request.json
+    print(data)
     id = int(data.get('id'))
+    print("\n\n\n\n",id,"\n\n\n\n\n")
 
     def get_length_text(id):
         x = synopsis.loc[id].sypnopsis.split(".")
