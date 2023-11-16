@@ -52,7 +52,7 @@ SLEEP_TIME = 1
 
 df = pd.read_csv("./data/anime.csv", index_col="MAL_ID")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
-data_new_user = pd.read_csv("./new_user.csv")
+data_new_user = pd.read_csv("./andre.csv")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()

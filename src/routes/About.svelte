@@ -176,7 +176,7 @@ async function generateImage() {
   </div>
   <div>
     <h2>Best recommendations for you:</h2>
-    <pre>{JSON.stringify(todos, null, 2)}</pre>
+    <!--<pre>{JSON.stringify(todos, null, 2)}</pre>-->
   </div>
         <div class="number_Recs">
             <div class="number-row">
