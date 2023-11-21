@@ -1,11 +1,29 @@
 <script>
 	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigate function
-	import { inputValue } from '../store';
+	import { inputValue, user_search, user, anime } from '../store';
   import { onMount } from 'svelte';
 
 	let inputValueValue = '';
+  let isDropdownVisible = false;
+  let user_searching = true
 
 	$: disabled = inputValueValue === '';
+
+  function selectOption(option) {
+    console.log('Selected option:', option);
+    const dropdownSpan = document.getElementById('m_dropdown').querySelector('span');
+    if (dropdownSpan) {
+      dropdownSpan.innerText = option;
+    }
+    
+    // Toggle the visibility of the dropdown
+    isDropdownVisible = !isDropdownVisible;
+  }
+
+  function toggleDropdown() {
+    // Toggle the visibility of the dropdown
+    isDropdownVisible = !isDropdownVisible;
+  }
 
 	async function search() {
 		try {
@@ -35,12 +53,54 @@
 		}
 	}
 
+  async function searchMalUser() {
+    user_search.set(true);
+    user.set(inputValueValue);
+
+    const filePath = `./users/${inputValueValue}.csv`;
+    try {
+      const response = await fetch(filePath);
+      const dataExists = response.ok;
+      if (dataExists){
+        console.log("File exists: good");     
+      } else {
+        const apiUrl = 'http://127.0.0.1:5000/scrap_user';
+        const requestBody = {
+          username: inputValueValue
+        };
+
+        console.log(`Searching for user ${inputValueValue}`)
+          
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (response.ok) {
+          console.log('User scrapped successfully');
+        } else {
+          console.error(`Error sending request: ${response.statusText}`);
+        }
+      }
+           
+    } catch (error) {
+      console.error('<animatch> Error:', error);
+    }
+  }
+
   onMount(() => {
     document.body.style.overflowY = 'hidden';
 
     return () => {
       document.body.style.overflowY = 'auto';
     };
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Your code that interacts with the DOM can go here
   });
 </script>
 
@@ -70,11 +130,20 @@
           <h1 class="lato">MATCH</h1>
           <hr class="white-line">
           <p class="lato-light">Discover personalized anime recommendations tailored to your preferences through your MAL profile or manually. Let us be your guide to a world of captivating new anime experiences.</p>
+          <div class="dropdown" id="m_dropdown">
+            <span on:click={toggleDropdown}>Select a model</span>
+            <div class="models" style="display: {isDropdownVisible ? 'block' : 'none'};">
+              <a on:click={() => selectOption('Content-Based')}>One-Anime</a>
+              <a on:click={() => selectOption('Collaborative Filtering')}>Popular</a>
+              <a on:click={() => selectOption('Hybrid')}>Accurate</a>
+            </div>
+          </div>
+          
           <div class="input-wrapper">
             <div class="input-container">
               <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValueValue}>
             </div>
-            <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={search}>
+            <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={searchMalUser}>
               <i class="fa fa-search"></i>
             </button>
           </div>
@@ -83,6 +152,39 @@
 </main>
 
 <style>
+
+  /* Added styles for the dropdown */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .dropdown-button {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with low opacity */
+    border: 1px solid white; /* White thin border */
+    color: white;
+  }
+
+  .dropdown-content {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.5); /* Black with low opacity */
+    border: 1px solid white; /* White thin border */
+    width: 160px; /* Set width to 160px */
+    top: 40px; /* Adjust the top position to place it below the button */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+  }
+
+  .dropdown-content a {
+    display: block;
+    padding: 8px;
+    text-decoration: none;
+    color: white;
+    text-align: center; /* Center the text within the options */
+  }
+
 nav{
         position: absolute;
         z-index: 5;

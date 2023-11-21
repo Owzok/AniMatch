@@ -1,5 +1,5 @@
 <script>
-  import { inputValue } from '../store';
+  import { inputValue, user } from '../store';
 
   let todos = null;
   let title_val = "";
@@ -138,12 +138,17 @@ async function generateImage() {
   }
 }
 
-  // Call the fetchTodos function when the component is mounted
   import { onMount } from 'svelte';
   onMount(() => {
+    // In the main page the scrollbar was desactivated
     document.body.style.overflowY = 'visible';
+
+
     fetchTodos();
+
+
     return () => {
+      // Desactivate scrollbar
       document.body.style.overflowY = 'auto';
     };
   })

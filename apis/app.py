@@ -39,6 +39,7 @@ os.makedirs(
 
 try: 
     chrome_options = ChromeOptions()
+    chrome_options.add_argument("--headless")
 
     service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(
@@ -52,7 +53,6 @@ SLEEP_TIME = 1
 
 df = pd.read_csv("./data/anime.csv", index_col="MAL_ID")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
-data_new_user = pd.read_csv("./andre.csv")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -60,6 +60,13 @@ def similar(a, b):
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
 def get_recommendations():
+    data = request.json
+    username = data.get('username')
+
+    if not username:
+        return jsonify({"error": "<animatch> Invalid request. Make sure 'username' is provided."})
+
+    data_new_user = pd.read_csv(f"../public/users/{username}.csv")
     titles, id_ratings, lst_id_url = cf.recommend(data_new_user, 10)
 
     jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url} for anime_id, anime_image_url in lst_id_url]
@@ -67,17 +74,39 @@ def get_recommendations():
 
     return jsonify({"results": json_data})
 
+
+def scroll_to_bottom():
+    driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+    time.sleep(1)  # Add a short delay to let the content load
+
+@app.route('/scrap_user', methods=['POST'])
+def scrap_user():
     data = request.json
-    id = int(data.get('title'))
-    title = df.loc[id].Name
+    username = data.get('username')
 
-    k = data.get('k')
+    url = f"https://myanimelist.net/animelist/{username}"
 
-    if not title or k is None:
-        return jsonify({"error": "Invalid request. Make sure 'title' and 'k' are provided."}), 400
-
-    recommendations = cb.recommend(title, k)
-    return jsonify({"recommendations": recommendations})
+    driver.get(url)
+    max_scroll_attempts = 5
+    for _ in range(max_scroll_attempts):
+        scroll_to_bottom()
+    time.sleep(1)
+    
+    list_items = driver.find_elements(By.CLASS_NAME, "list-item")
+    anime_list = []
+    for item in list_items:
+        m_anime = {}
+        link = item.find_element(By.CLASS_NAME, "link")
+        href = link.get_attribute("href")
+        score_label = item.find_element(By.CLASS_NAME, "score-label").text
+        m_anime['user_id'] = 786
+        m_anime['anime_id'] = href.split("/")[4]
+        m_anime['rating'] = score_label
+        if score_label != "-":
+            anime_list.append(m_anime)
+    df = pd.DataFrame(anime_list)
+    df.to_csv(f"../public/users/{username}.csv", index=False)
+    return json.dumps({"Status Code": 200})
 
 @app.route('/get_malid', methods=['POST'])
 @cross_origin()
