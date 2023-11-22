@@ -1,5 +1,5 @@
 <script>
-  import { inputValue, user } from '../store';
+  import { first_anime_id, anime_links } from '../store';
 
   let todos = null;
   let title_val = "";
@@ -7,9 +7,13 @@
   let imageSrc = null;
   let mal_images = [];
 
-  //const unsubscribe = inputValue.subscribe(value => {
-  //  title_val = value
-  //});
+  const unsubscribe = first_anime_id.subscribe(value => {
+    title_val = value
+  });
+
+  const unsubscribe2 = anime_links.subscribe(value => {
+    mal_images = value
+  });
 
   let title = "";
   let episodes = "";
@@ -18,6 +22,7 @@
   let studio = "";
   let rating = "";
   let desc = "";
+
 
   async function fetchTodos() {
   try {
@@ -67,6 +72,8 @@
 
     if (imageExists) {
       imageSrc = `/download/${title_val}.jpg`;
+    } else {
+      generateImage();
     }
   } catch (error) {
       console.error('Error:', error);
@@ -101,7 +108,7 @@
 }
 
 async function generateImage() {
-  const api_url = 'http://localhost:5000/scrape_image';
+  const api_url = 'http://127.0.0.1:5000/scrape_image';
 
   try {
     const response = await fetch(`/download/${title_val}.jpg`);
@@ -141,14 +148,17 @@ async function generateImage() {
   import { onMount } from 'svelte';
   onMount(() => {
     // In the main page the scrollbar was desactivated
+    document.body.style.backgroundColor = 'black';
     document.body.style.overflowY = 'visible';
 
+    retrieveInfo();
+    checkImageExists();
 
-    fetchTodos();
-
+    //fetchTodos();
 
     return () => {
       // Desactivate scrollbar
+      document.body.style.backgroundColor = ''; // or you can set it to the original color
       document.body.style.overflowY = 'auto';
     };
   })
@@ -156,6 +166,13 @@ async function generateImage() {
 </script>
 
 <main>
+  <div class="image-container">
+    {#if imageExists}
+      <img src="/download/{title_val}.jpg" alt="" />
+    {:else}
+    <img src="/download/1.jpg" alt="" />
+    {/if}
+</div>
   <div class="info">
     <p class="best">Best Recommendation</p>
     <h1>{title}</h1>
@@ -172,17 +189,11 @@ async function generateImage() {
     <p class="Genres">Avant Garde, Comedy, Drama, Mystery, Supernatural, Psychological</p>
     <button>MyAnimeList</button>
   </div>
-  <div class="image-container">
-      {#if imageExists}
-        <img src="/download/{title_val}.jpg" alt="" />
-      {:else}
-      <img src="/download/1.jpg" alt="" />
-      {/if}
-  </div>
-  <div>
+
+  <!--<div>
     <h2>Best recommendations for you:</h2>
-    <!--<pre>{JSON.stringify(todos, null, 2)}</pre>-->
-  </div>
+    <pre>{JSON.stringify(todos, null, 2)}</pre>
+  </div>-->
         <div class="number_Recs">
             <div class="number-row">
                 <img src="./icons/2.png" alt="2">
@@ -244,9 +255,9 @@ async function generateImage() {
 
   .info{
       color: white;
-      position: absolute;
+      position: relative;
       z-index: 4;
-      width: 550px;
+      width: 650px;
       margin-left: 80px;
       margin-top: 130px;
   }
@@ -304,14 +315,14 @@ async function generateImage() {
   }
 
   .image-container {
-    position: relative;
+    position: absolute;
     overflow: hidden;
   }
 
   .image-container img {
     width: 70%; /* Adjust the image width as needed */
     float: right;
-    margin-top: -60px;
+    /*margin-top: -60px;*/
   }
 
   .image-container::before {
