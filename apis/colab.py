@@ -35,9 +35,9 @@ TO DO:
 
 class ColaborativeRecommender:
     def __init__(self):
-        with open("./model_"+MODEL_LOSS+"_1.pkl", 'rb') as model_file:
+        with open("./models/model_"+MODEL_LOSS+"_1.pkl", 'rb') as model_file:
             self.model = pickle.load(model_file)
-        with open("./dataset_save.pkl", 'rb') as dataset_file:
+        with open("./models/dataset_save.pkl", 'rb') as dataset_file:
             self.df = pickle.load(dataset_file)
 
         self.map_animes = self.df.mapping()[2]
@@ -47,7 +47,7 @@ class ColaborativeRecommender:
         self.user_embeddings = self.model.get_user_representations()[1]
         self.item_biases = self.model.get_item_representations()[0]
         self.item_embeddings = self.model.get_item_representations()[1]
-        self.anime_titles = pd.read_csv("./anime_titles.csv")
+        self.anime_titles = pd.read_csv("./data/anime_titles.csv")
 
     def get_anime_mapped(self, id_to_map):
         return self.map_animes.get(id_to_map, None)
@@ -168,12 +168,12 @@ class ColaborativeRecommender:
 
         return anime_titles, lst_animes_ratings, lst_id_url
     
-#cl = ColaborativeRecommender()
-#data_new_user = pd.read_csv("./new_user.csv")
-#titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
+cl = ColaborativeRecommender()
+data_new_user = pd.read_csv("./data/user_tests/new_user.csv")
+titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
 
-#print(lst_id_url)
+print(lst_id_url)
 
-#for elem in range(len(id_ratings)):
-    #print("Anime: ", titles[elem])
-    #print("con score ", id_ratings[elem][1])
+for elem in range(len(id_ratings)):
+    print("Anime: ", titles[elem])
+    print("con score ", id_ratings[elem][1])
