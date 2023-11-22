@@ -27,7 +27,7 @@ from difflib import SequenceMatcher         # search title by name
 
 app = Flask(__name__)
 CORS(app) 
-#cb = ContentBasedRecommender()
+cb = ContentBasedRecommender()
 cf = ColaborativeRecommender()
 
 cwd = os.getcwd()
@@ -39,11 +39,11 @@ os.makedirs(
 
 try: 
     chrome_options = ChromeOptions()
-    chrome_options.add_argument("--headless")
+    #chrome_options.add_argument("")
 
-    service = ChromeService(ChromeDriverManager().install())
+    #service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(
-        service=service,
+        #service=service,
         options=chrome_options
     )
 except:
@@ -58,6 +58,12 @@ data_new_user = pd.read_csv("./data/user_tests/andre.csv")
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
+def retrieve_id(title):
+    if title is None:
+        return jsonify({"error": "Invalid request. Make sure title are provided "}), 400
+
+    df['r'] = df.apply(lambda x: similar(x.Name, title), axis=1)
+    return df['r'].idxmax()
 
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
@@ -76,6 +82,22 @@ def get_recommendations():
 
     return jsonify({"results": json_data})
 
+@app.route('/anirec', methods=['POST'])
+@cross_origin()
+def get_anirec():
+    data = request.json
+    id = retrieve_id(data.get('title'))
+    title = df.loc[id].Name
+
+    if title is None:
+        return jsonify({"error": "Invalid request. Make sure 'title' and 'k' are provided."}), 400
+
+    recommendations = cb.recommend_ten(title)
+
+    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url} for anime_id, anime_image_url in recommendations]
+    json_data = json.dumps(jsonifiable_data)
+
+    return jsonify({"results": json_data})
 
 def scroll_to_bottom():
     '''Scroll to the bottom of the page'''
@@ -105,7 +127,7 @@ def scrap_user():
     data = request.json
     username = data.get('username')
 
-    url = f"https://myanimelist.net/animelist/{username}"
+    url = f"https://myanimelist.net/animelist/{username}?status=7&order=4&order2=0"
 
     driver.get(url)
     scroll_to_bottom()

@@ -1,68 +1,59 @@
 <script>
-	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigate function
-	import { inputValue, first_anime_id, anime_links } from '../store';
-  import { onMount } from 'svelte';
-
+	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigation
+	import { inputValue, first_anime_id, anime_links } from '../store'; // Import store
+  import { onMount } from 'svelte'; // Import void start
+  // Local variables
 	let inputValueValue = '';
-  let isDropdownVisible = false;
-
-  let showListbox = false;
-
-  let selectedOption = null;
-
-  function toggleListbox() {
-    showListbox = !showListbox;
-  }
-
+  let selectedModel = 'model1';
+  let overlay = null;
+  // Reactive variable, whenever inputValueValue changes, it also tries to.
+  // $: is the reactive shorthand syntax of Svelte
 	$: disabled = inputValueValue === '';
-
-  function selectOption(option) {
-    selectedOption = option
-    console.log('Selected option:', option);
-    const dropdownSpan = document.getElementById('m_dropdown').querySelector('span');
-    if (dropdownSpan) {
-      dropdownSpan.innerText = option;
-    }
-
-    // Toggle the visibility of the dropdown
-    isDropdownVisible = !isDropdownVisible;
+  // Select which model to use, called inline by the div's onclick function
+  function selectModel(modelId) {
+    selectedModel = modelId;
+    console.log('<animatch> Selected model:', modelId);
   }
 
-  function toggleDropdown() {
-    // Toggle the visibility of the dropdown
-    isDropdownVisible = !isDropdownVisible;
-  }
-
-	async function search() {
+  // Should be used when content-based is selected (model2)
+	async function anime_search() {
 		try {
-			const response = await fetch('http://127.0.0.1:5000/get_malid', {
+      showOverlay(`Getting recommendations for ${ inputValueValue }`)
+      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+			const response = await fetch('http://127.0.0.1:5000/anirec', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ title: inputValueValue }), // Replace with your API request payload
+				body: JSON.stringify({ title: inputValueValue }),
 			});
-
+      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 			if (response.ok) {
-				const data = await response.json();
-        const id = data.id
-				// console.log(data.id);
+				const json = await response.json();
+        if ('results' in json){
+          const parsedResults = JSON.parse(json.results);
+          const firstAnimeID = parsedResults[0].anime_id;
+          const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
 
-				if (inputValueValue !== '') {
-					inputValue.set(id); // Update the store with the inputValue
-					console.log(`Searching for ${id} of ${inputValueValue}`);
-				}
-				
-				// Navigate to the "/about" route after logging the result
-				navigate('/about');
+          first_anime_id.set(firstAnimeID);
+          anime_links.set(restOfUrls);
+
+          console.log("<animatch> First anime id:", firstAnimeID);
+          console.log("<animatch> Rest of the anime image urls:", restOfUrls);
+        }
+        // Navigation
+        navigate('/about');
 			}
 		} catch (error) {
-			console.error('Error:', error);
+			console.error('<animatch> Error:', error);
 		}
 	}
 
+  // Should be used when collaborative-filtering is selected or by default (model1)
   async function collab() {
     try {
+      showOverlay(`Searching user ${ inputValueValue }`)
+      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
       const response = await fetch('http://127.0.0.1:5000/recommend', {
         method: 'POST',
         headers: {
@@ -70,20 +61,20 @@
         },
         body: JSON.stringify({ username: inputValueValue }),
       });
-
+      // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
       if(response.ok) {
         const json = await response.json();
         if ('results' in json) {
           const parsedResults = JSON.parse(json.results);
           const firstAnimeId = parsedResults[0].anime_id;
           const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
-
+          // firstAnimeId <<store>>: ID of the best recommendation to then get its data
+          // restOfUrls <<store>>: image links of the other 9 recommendations to show
           first_anime_id.set(firstAnimeId);
           anime_links.set(restOfUrls);
-
-          console.log("First anime id:", firstAnimeId);
-          console.log("Rest of the anime image urls:", restOfUrls);
-
+          console.log("<animatch> First anime id:", firstAnimeId);
+          console.log("<animatch> Rest of the anime image urls:", restOfUrls);
+          // Navigation
           navigate('/about');
         }
       }
@@ -92,55 +83,65 @@
     }
   }
 
+  function findMethod(){
+    if(selectedModel === "model2"){
+      anime_search();
+    } else {
+      searchMalUser();
+    }
+  }
+
+  // Scrap user data from MAL
   async function searchMalUser() {
+    // Checks first if the user data have'been already scrapped
     const filePath = `./users/${inputValueValue}.csv`;
     try {
       const response = await fetch(filePath);
       const dataExists = response.ok;
       if (dataExists){
-        console.log("File exists: good");  
-        
+        console.log("<animatch> File exists: good");  
+        // If exists executes
+        // await its necessary since collab has some fetch functions
         await collab();
-
+        //
       } else {
-        const apiUrl = 'http://127.0.0.1:5000/scrap_user';
-        const requestBody = {
-          username: inputValueValue
-        };
-
+        showOverlay(`Retrieving data from ${ inputValueValue }`)
+        // Scrap
         console.log(`Searching for user ${inputValueValue}`)
-          
-        const response = await fetch(apiUrl, {
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+        const response = await fetch('http://127.0.0.1:5000/scrap_user', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify({ username: inputValueValue }),
         });
-
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         if (response.ok) {
-          console.log('User scrapped successfully');
+          console.log('<animatch> User scrapped successfully');
+          // Execute
           await collab();
+          //
         } else {
-          console.error(`Error sending request: ${response.statusText}`);
+          console.error(`<animatch> Error sending request: ${response.statusText}`);
         }
       }
-           
     } catch (error) {
       console.error('<animatch> Error:', error);
     }
   }
 
+  function showOverlay(loadingText) {
+    overlay.style.display = 'flex';
+    overlay.querySelector('.loading-text').textContent = loadingText;
+  }
+
   onMount(() => {
     document.body.style.overflowY = 'hidden';
-
+    overlay = document.querySelector('.overlay');
     return () => {
       document.body.style.overflowY = 'auto';
     };
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    // Your code that interacts with the DOM can go here
   });
 </script>
 
@@ -157,13 +158,16 @@
 </Router>
 
 <main>
+  <div class="overlay">
+    <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    <p class="loading-text">Scrapping User</p>
+  </div>
   <div class="background-image image1"></div>
   <div class="background-image image2"></div>
   <div class="background-image image3"></div>
   <div class="background-image image4"></div>
   <div class="background-image image5"></div>
   <div class="background-image image6"></div>
-  
   <body>
       <div class="container">
           <h1 class="lato-bold">ANIME</h1>
@@ -172,28 +176,60 @@
           <p class="lato-light">Discover personalized anime recommendations tailored to your preferences through your MAL profile or manually. Let us be your guide to a world of captivating new anime experiences.</p>
           <div class="input-wrapper">
             <div class="input-container">
-              <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValueValue}>
-            </div>
-            <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={searchMalUser}>
+              <input type="text" class="lato-light rounded-left" placeholder={selectedModel === 'model2' ? 'Enter Anime Name' : 'Enter MyAnimeList Username'} bind:value={inputValueValue}>
+            </div>            
+            <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={findMethod}>
               <i class="fa fa-search"></i>
             </button>
           </div>
           <div class="options">
-            <div class="item late-light">Content</div>
-            <div class="item late-light">Collab</div>
-            <div class="item late-light">Collab V2</div>
-            <div class="item late-light">Hybrid</div>
-            <div class="item late-light">Network</div>
+            <div id="model1" 
+            class="item late-light"
+            class:selected={selectedModel === 'model1'}
+            on:click={() => selectModel('model1')}
+            on:keydown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Space') {
+                selectModel('model1');
+              }
+            }}>Collab</div>
+            <div id="model2" class="item late-light"
+            class:selected={selectedModel === 'model2'}
+            on:click={() => selectModel('model2')}
+            on:keydown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Space') {
+                selectModel('model2');
+              }
+            }}>Content</div>
+            <div id="model3" class="item late-light"
+            class:selected={selectedModel === 'model3'}
+            on:click={() => selectModel('model3')}
+            on:keydown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Space') {
+                selectModel('model3');
+              }
+            }}>Collab V2</div>
+            <div id="model4" class="item late-light"
+            class:selected={selectedModel === 'model4'}
+            on:click={() => selectModel('model4')}
+            on:keydown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Space') {
+                selectModel('model4');
+              }
+            }}>Hybrid</div>
+            <div id="model5" class="item late-light"
+            class:selected={selectedModel === 'model5'}
+            on:click={() => selectModel('model5')}
+            on:keydown={(event) => {
+              if (event.key === 'Enter' || event.key === 'Space') {
+                selectModel('model5');
+              }
+            }}>Network</div>
           </div>
       </div>
   </body>
 </main>
 
 <style>
-.selected{
-  background-color: rgba(255,255,255,0.5);
-}
-
 .options{
   width: 450px;
   display: flex;
@@ -213,9 +249,15 @@
   cursor: pointer;
   border-left: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 .item:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(0, 128, 0, 0.4);
+}
+
+.selected {
+  background-color: green; /* Add the green background for the selected model */
+}
+.selected:hover {
+  background-color: green; /* Add the green background for the selected model */
 }
 
 nav{
@@ -565,6 +607,107 @@ input[type="text"] {
   font-size: 1;
   background: rgba(0, 0, 0, 0.4); 
   border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Adjust the last value for transparency */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  display: none;
+}
+
+.overlay p{
+  color: white;
+  font-size: 20px;
+  font-family: 'LatoLight', sans-serif;
+  animation: lds-spinner 1.5s alternate ease-in infinite;
+}
+
+.lds-spinner {
+  color: official;
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}
+.lds-spinner div {
+  transform-origin: 40px 40px;
+  animation: lds-spinner 1.2s linear infinite;
+}
+.lds-spinner div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 37px;
+  width: 6px;
+  height: 18px;
+  border-radius: 20%;
+  background: #fff;
+}
+.lds-spinner div:nth-child(1) {
+  transform: rotate(0deg);
+  animation-delay: -1.1s;
+}
+.lds-spinner div:nth-child(2) {
+  transform: rotate(30deg);
+  animation-delay: -1s;
+}
+.lds-spinner div:nth-child(3) {
+  transform: rotate(60deg);
+  animation-delay: -0.9s;
+}
+.lds-spinner div:nth-child(4) {
+  transform: rotate(90deg);
+  animation-delay: -0.8s;
+}
+.lds-spinner div:nth-child(5) {
+  transform: rotate(120deg);
+  animation-delay: -0.7s;
+}
+.lds-spinner div:nth-child(6) {
+  transform: rotate(150deg);
+  animation-delay: -0.6s;
+}
+.lds-spinner div:nth-child(7) {
+  transform: rotate(180deg);
+  animation-delay: -0.5s;
+}
+.lds-spinner div:nth-child(8) {
+  transform: rotate(210deg);
+  animation-delay: -0.4s;
+}
+.lds-spinner div:nth-child(9) {
+  transform: rotate(240deg);
+  animation-delay: -0.3s;
+}
+.lds-spinner div:nth-child(10) {
+  transform: rotate(270deg);
+  animation-delay: -0.2s;
+}
+.lds-spinner div:nth-child(11) {
+  transform: rotate(300deg);
+  animation-delay: -0.1s;
+}
+.lds-spinner div:nth-child(12) {
+  transform: rotate(330deg);
+  animation-delay: 0s;
+}
+@keyframes lds-spinner {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 </style>

@@ -189,11 +189,8 @@ async function generateImage() {
     <p class="Genres">Avant Garde, Comedy, Drama, Mystery, Supernatural, Psychological</p>
     <button>MyAnimeList</button>
   </div>
-
-  <!--<div>
-    <h2>Best recommendations for you:</h2>
-    <pre>{JSON.stringify(todos, null, 2)}</pre>
-  </div>-->
+  <h2>Best recommendations for you</h2>
+  <div class="main-recs">
         <div class="number_Recs">
             <div class="number-row">
                 <img src="./icons/2.png" alt="2">
@@ -223,10 +220,24 @@ async function generateImage() {
             {/each}
           </div>
         </div>
+    </div>
+    <h2>Best <b>MOVIE</b> recommendations for you</h2>
+    <div class="image-row-l">
+      {#each mal_images.slice(0, 6) as url (url)}
+        <img src={url} alt="">
+      {/each}
+    </div>
+    <h2>Anime with less than <b>13</b> episodes</h2>
+    <div class="image-row-l">
+      {#each mal_images.slice(3, 9) as url (url)}
+        <img src={url} alt="">
+      {/each}
+    </div>
 </main>
 
 <style>
-  @font-face {
+
+@font-face {
     font-family: 'Lato';
     src: url('/fonts/Lato-Black.ttf') format('truetype');
   }
@@ -257,8 +268,9 @@ async function generateImage() {
       color: white;
       position: relative;
       z-index: 4;
-      width: 650px;
-      margin-left: 80px;
+      width: 500px;
+      max-height: 450px;
+      margin-left: 140px;
       margin-top: 130px;
   }
 
@@ -314,13 +326,17 @@ async function generateImage() {
       margin-right: 30px;
   }
 
+  .main-recs{
+    height: 570px;
+  }
+
   .image-container {
     position: absolute;
     overflow: hidden;
   }
 
   .image-container img {
-    width: 70%; /* Adjust the image width as needed */
+    width: 80%; /* Adjust the image width as needed */
     float: right;
     /*margin-top: -60px;*/
   }
@@ -332,7 +348,7 @@ async function generateImage() {
     right: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(0,0,0,1) 30%, rgba(0,0,0,0.6685267857142857) 50%, rgba(0,0,0,0) 70%);
+    background: linear-gradient(90deg, rgba(0,0,0,1) 20%, rgba(0,0,0,0.6685267857142857) 30%, rgba(0,0,0,0) 50%);
     pointer-events: none;
   }
 
@@ -354,27 +370,41 @@ async function generateImage() {
   .recs {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items:flex-start;
 }
 
 .image-row {
     display: flex;
     justify-content: center;
     margin-bottom: 20px; /* Adjust the margin as needed */
+    margin-left: 245px;
 }
 
 .image-row-s {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px; /* Adjust the margin as needed */
+    margin-left: 170px;
+}
+
+.image-row-l {
+    display: flex;
+    justify-content: flex-start;
+    margin-left: 130px;
+    margin-top: 30px;
+    margin-bottom: 70px;
+}
+
+.image-row-l img{
+    margin-right: 20px;
+    width: 500px;
 }
 
 .image-row img {
     height: 250px;
-    margin-left: 130px;
     margin-bottom: 70px;
     z-index: 3;
     transition: .3s;
+    margin-right: 130px;
 }
 
 .image-row img:hover {
@@ -384,43 +414,59 @@ async function generateImage() {
 
 .image-row-s img {
     height: 200px;
-    margin-left: 130px;
+    width: 141px;
     z-index: 3;
     transition: .3s;
+    margin-right: 128px;
 }
 
 .image-row-s img:hover{
     height: 225px;
+    width: 160px;
 }
 
 .number_Recs {
     display: flex;
     justify-content: center;
     position: absolute;
-    margin-top: 25px;
+    align-items: flex-start;
+    margin-top: 40px;
 }
 
 .number-row{
-    margin-left: 58px;
+    margin-left: 130px;
+}
+
+.number-row-s{
+    margin-left: 60px;
+    margin-top: 290px;
 }
 
 .number-row img{
-    height: 225px;
-    margin-left: 53px;
+    height: 225px;;
     z-index: 0;
+    margin-right: 190px;
+}
+
+b{
+  font-family: 'LatoBold', sans-serif;
+  letter-spacing: 1px;
 }
 
 h2{
     color: white;
-    margin-left: 80px;
-    margin-bottom: 40px;
+    margin: 10px;
+    margin-left: 150px;
+    font-size: 18px;
+    font-family: 'LatoLight', sans-serif;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 .number-row-s img{
-    height: 200px;
-    margin-top: 320px;
+    height: 220px;
+    margin-right: 155px;
     z-index: 0;
-    margin-left: 58px;
 }
 
 </style>
