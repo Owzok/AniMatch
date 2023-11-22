@@ -11,15 +11,23 @@ import matplotlib.image as mpimg
 from PIL import Image
 import io
 
+import warnings
+# Filter or ignore the specific warning
+warnings.filterwarnings("ignore", category=UserWarning, module="lightfm")
 from lightfm import LightFM
+from lightfm.data import Dataset
+
 import pandas as pd
 from scipy import sparse
-from lightfm.data import Dataset
 import json
+
+import os
+import concurrent.futures
+from io import BytesIO
 
 NUM_COMPONENTS = 30
 MODEL_LOSS = "warp"
-
+MAIN_PATH = "../public/download/"
 """
 TO DO:
 - add second model to AB Test al momento de hibridizar
@@ -56,7 +64,7 @@ class ColaborativeRecommender:
         return self.inv_dict.get(id_to_inverse, None)
 
     #Para correr y ver imagenes de manera rapida
-    def get_lst_images(self, lst_recommend):
+    def get_lst_images2(self, lst_recommend):
         url = "https://myanimelist.net/anime/"
         lst_images = []
         for anime in lst_recommend:
@@ -69,6 +77,47 @@ class ColaborativeRecommender:
                 lst_images.append(image_url)
         
         return lst_images
+    
+    def save_image(self, anime_id):
+        full_url = MAIN_PATH+f"{anime_id}.jpg"
+        if os.path.isfile(full_url):
+            print("si hay", anime_id)
+            return (anime_id, full_url)
+        else:
+            print("no hay", anime_id)
+            url = "https://myanimelist.net/anime/"
+            response = requests.get(url+str(anime_id))
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                div_tag = soup.find('div', {'class': 'leftside'})
+                img_tag = div_tag.find('img') if div_tag else None
+                if img_tag:
+                    img_url = img_tag['data-src']
+
+                    response = requests.get(img_url)
+                    image_data = response.content
+                    image = Image.open(io.BytesIO(image_data))
+                    
+                    image.save(full_url)
+                    print(f"Image saved as {anime_id}.jpg")
+                    
+                    return (anime_id, full_url)
+            else:
+                print(f"Failed to download image. Status code: {response.status_code}")
+                return (response.status_code, None)
+
+    def get_lst_images(self, lst_recommend):
+        imgs_anime = {}
+        with concurrent.futures.ThreadPoolExecutor() as mainExecutor:
+            future_execution = [mainExecutor.submit(self.save_image,
+                                                anime)
+                                for anime in lst_recommend]
+            if future_execution is not None: 
+                for future in concurrent.futures.as_completed(future_execution):
+                    resultado = future.result()
+                    if resultado is not None: 
+                        imgs_anime[resultado[0]] = resultado[1]
+        return imgs_anime
 
     def try_outs(self, lst_images, lst_recommend):
         num_images = len(lst_images)
@@ -164,10 +213,12 @@ class ColaborativeRecommender:
         lst_id_url = []
         lst_url = self.get_lst_images(anime_id)
         for x in range(len(anime_id)):
-            lst_id_url.append((anime_id[x], lst_url[x]))
+            animeid = anime_id[x]
+            lst_id_url.append((animeid, lst_url[animeid]))
 
         return anime_titles, lst_animes_ratings, lst_id_url
-    
+
+"""
 cl = ColaborativeRecommender()
 data_new_user = pd.read_csv("./data/user_tests/new_user.csv")
 titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
@@ -177,3 +228,5 @@ print(lst_id_url)
 for elem in range(len(id_ratings)):
     print("Anime: ", titles[elem])
     print("con score ", id_ratings[elem][1])
+
+"""
