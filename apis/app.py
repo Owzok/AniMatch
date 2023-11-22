@@ -58,6 +58,7 @@ data_new_user = pd.read_csv("./data/user_tests/andre.csv")
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
+
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
 def get_recommendations():
@@ -77,8 +78,27 @@ def get_recommendations():
 
 
 def scroll_to_bottom():
-    driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
-    time.sleep(1)  # Add a short delay to let the content load
+    '''Scroll to the bottom of the page'''
+    last_height = driver.execute_script('return document.body.scrollHeight')
+    while True:
+        driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+        time.sleep(7)
+
+        new_height = driver.execute_script('return document.body.scrollHeight')
+        try:
+            element = driver.find_element(
+                by=By.CSS_SELECTOR,
+                value='.YstHxe input'
+            )
+            element.click()
+            time.sleep(1)
+        except:
+            pass
+
+        if new_height == last_height:
+            break
+
+        last_height = new_height
 
 @app.route('/scrap_user', methods=['POST'])
 def scrap_user():
@@ -88,9 +108,7 @@ def scrap_user():
     url = f"https://myanimelist.net/animelist/{username}"
 
     driver.get(url)
-    max_scroll_attempts = 5
-    for _ in range(max_scroll_attempts):
-        scroll_to_bottom()
+    scroll_to_bottom()
     time.sleep(1)
     
     list_items = driver.find_elements(By.CLASS_NAME, "list-item")
@@ -224,7 +242,7 @@ def scrape_image():
             value='//*[@id="APjFqb"]'
         )
 
-        box.send_keys(search_query+" screencap imagesize:1920x1080 filetype:jpg")
+        box.send_keys(search_query+" screencap filetype:jpg OR filetype:jpeg OR filetype:png imagesize:1920x1080")
         box.send_keys(Keys.ENTER)
         time.sleep(SLEEP_TIME)
 

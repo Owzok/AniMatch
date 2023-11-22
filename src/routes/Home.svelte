@@ -1,21 +1,29 @@
 <script>
 	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigate function
-	import { inputValue, user_search, user, anime } from '../store';
+	import { inputValue, first_anime_id, anime_links } from '../store';
   import { onMount } from 'svelte';
 
 	let inputValueValue = '';
   let isDropdownVisible = false;
-  let user_searching = true
+
+  let showListbox = false;
+
+  let selectedOption = null;
+
+  function toggleListbox() {
+    showListbox = !showListbox;
+  }
 
 	$: disabled = inputValueValue === '';
 
   function selectOption(option) {
+    selectedOption = option
     console.log('Selected option:', option);
     const dropdownSpan = document.getElementById('m_dropdown').querySelector('span');
     if (dropdownSpan) {
       dropdownSpan.innerText = option;
     }
-    
+
     // Toggle the visibility of the dropdown
     isDropdownVisible = !isDropdownVisible;
   }
@@ -53,16 +61,47 @@
 		}
 	}
 
-  async function searchMalUser() {
-    user_search.set(true);
-    user.set(inputValueValue);
+  async function collab() {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/recommend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: inputValueValue }),
+      });
 
+      if(response.ok) {
+        const json = await response.json();
+        if ('results' in json) {
+          const parsedResults = JSON.parse(json.results);
+          const firstAnimeId = parsedResults[0].anime_id;
+          const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
+
+          first_anime_id.set(firstAnimeId);
+          anime_links.set(restOfUrls);
+
+          console.log("First anime id:", firstAnimeId);
+          console.log("Rest of the anime image urls:", restOfUrls);
+
+          navigate('/about');
+        }
+      }
+    } catch (error) {
+      console.error('<animatch> Error', error)
+    }
+  }
+
+  async function searchMalUser() {
     const filePath = `./users/${inputValueValue}.csv`;
     try {
       const response = await fetch(filePath);
       const dataExists = response.ok;
       if (dataExists){
-        console.log("File exists: good");     
+        console.log("File exists: good");  
+        
+        await collab();
+
       } else {
         const apiUrl = 'http://127.0.0.1:5000/scrap_user';
         const requestBody = {
@@ -81,6 +120,7 @@
 
         if (response.ok) {
           console.log('User scrapped successfully');
+          await collab();
         } else {
           console.error(`Error sending request: ${response.statusText}`);
         }
@@ -130,15 +170,6 @@
           <h1 class="lato">MATCH</h1>
           <hr class="white-line">
           <p class="lato-light">Discover personalized anime recommendations tailored to your preferences through your MAL profile or manually. Let us be your guide to a world of captivating new anime experiences.</p>
-          <div class="dropdown" id="m_dropdown">
-            <span on:click={toggleDropdown}>Select a model</span>
-            <div class="models" style="display: {isDropdownVisible ? 'block' : 'none'};">
-              <a on:click={() => selectOption('Content-Based')}>One-Anime</a>
-              <a on:click={() => selectOption('Collaborative Filtering')}>Popular</a>
-              <a on:click={() => selectOption('Hybrid')}>Accurate</a>
-            </div>
-          </div>
-          
           <div class="input-wrapper">
             <div class="input-container">
               <input type="text" class="lato-light rounded-left" placeholder="Enter MyAnimeList Username" bind:value={inputValueValue}>
@@ -147,81 +178,84 @@
               <i class="fa fa-search"></i>
             </button>
           </div>
-        </div>
+          <div class="options">
+            <div class="item late-light">Content</div>
+            <div class="item late-light">Collab</div>
+            <div class="item late-light">Collab V2</div>
+            <div class="item late-light">Hybrid</div>
+            <div class="item late-light">Network</div>
+          </div>
+      </div>
   </body>
 </main>
 
 <style>
+.selected{
+  background-color: rgba(255,255,255,0.5);
+}
 
-  /* Added styles for the dropdown */
-  .dropdown {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-  }
+.options{
+  width: 450px;
+  display: flex;
+  height: 45px;
+  background-color: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255, 0.7);
+  border-radius: 5px;
+  margin-top: 10px;
+  vertical-align: baseline;
+}
 
-  .dropdown-button {
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.5); /* Black with low opacity */
-    border: 1px solid white; /* White thin border */
-    color: white;
-  }
+.item{
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-  .dropdown-content {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0.5); /* Black with low opacity */
-    border: 1px solid white; /* White thin border */
-    width: 160px; /* Set width to 160px */
-    top: 40px; /* Adjust the top position to place it below the button */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-  }
-
-  .dropdown-content a {
-    display: block;
-    padding: 8px;
-    text-decoration: none;
-    color: white;
-    text-align: center; /* Center the text within the options */
-  }
+.item:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
 
 nav{
-        position: absolute;
-        z-index: 5;
-        font-family: 'LatoLight', sans-serif;
-    }
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #fff;
-      padding: 10px;
-    }
-  
-    .navbar-links {
-        text-decoration: none;
-        flex: 2;
-        display: flex;
-        justify-content: space-around;
-        margin-top: 30px;
-    }
-  
-    .navbar-link {
-        color: #fff;
-        font-size: 12px;
-        margin: 0 60px;
-    }
+  position: absolute;
+  z-index: 5;
+  font-family: 'LatoLight', sans-serif;
+}
 
-    .inactive{
-        color: grey;
-    }
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  padding: 10px;
+}
   
-    .logo {
-        width: 30px;
-        height: 30px;
-        margin: 0 145px;
-        color: white;
-    }
+.navbar-links {
+  text-decoration: none;
+  flex: 2;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+}
+  
+.navbar-link {
+  color: #fff;
+  font-size: 12px;
+  margin: 0 60px;
+}
+
+.inactive{
+  color: grey;
+}
+  
+.logo {
+  width: 30px;
+  height: 30px;
+  margin: 0 145px;
+  color: white;
+}
 
 body {
     margin: 0;
