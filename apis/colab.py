@@ -44,9 +44,7 @@ TO DO:
 class ColaborativeRecommender:
     def __init__(self):
         with open("./models/model_"+MODEL_LOSS+"_1.pkl", 'rb') as model_file:
-        with open("./models/model_"+MODEL_LOSS+"_1.pkl", 'rb') as model_file:
             self.model = pickle.load(model_file)
-        with open("./models/dataset_save.pkl", 'rb') as dataset_file:
         with open("./models/dataset_save.pkl", 'rb') as dataset_file:
             self.df = pickle.load(dataset_file)
 
@@ -224,7 +222,7 @@ class ColaborativeRecommender:
 #cl = ColaborativeRecommender()
 #data_new_user = pd.read_csv("./data/user_tests/new_user.csv")
 #titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
-
+"""
 print(lst_id_url)
 
 for elem in range(len(id_ratings)):

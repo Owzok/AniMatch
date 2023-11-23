@@ -41,6 +41,55 @@ npm run dev
 
 Open your browser and navigate to http://localhost:8080 to access AniMatch locally.
 
+## Documentacion
+
+### Problemática de Negocio
+
+
+
+### Nomenclatura
+
+
+
+### Retos analíticos, requerimientos, objetivos de análisis
+
+
+
+### Analytical Tasks
+
+
+
+### Metodología - Técnica usada
+
+
+
+### Documentación del sistema y sus recursos de funcionalidad
+
+
+
+### Implementación
+
+
+
+### Conjunto de Datos
+
+
+
+### Experimentación - Validación
+
+
+
+### Estudios de Caso 
+
+
+
+### Feedback de Experto
+
+
+### Estudios de Usuario
+
+
+
 ## Screenshots
 [Insert screenshots or images of your application here]
 
