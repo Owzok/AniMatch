@@ -39,7 +39,7 @@ os.makedirs(
 
 try: 
     chrome_options = ChromeOptions()
-    #chrome_options.add_argument("")
+    chrome_options.add_argument("--headless")
 
     #service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(

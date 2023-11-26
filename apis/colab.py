@@ -27,7 +27,9 @@ from io import BytesIO
 
 NUM_COMPONENTS = 30
 MODEL_LOSS = "warp"
-MAIN_PATH = "../public/download/"
+MAIN_PATH = "../public/download/profiles/"
+RETURNABLE_PATH = "../download/profiles/"
+
 """
 TO DO:
 - add second model to AB Test al momento de hibridizar
@@ -81,9 +83,10 @@ class ColaborativeRecommender:
     
     def save_image(self, anime_id):
         full_url = MAIN_PATH+f"{anime_id}.jpg"
+        returnable_url = RETURNABLE_PATH+f"{anime_id}.jpg"
         if os.path.isfile(full_url):
             print("si hay", anime_id)
-            return (anime_id, full_url)
+            return (anime_id, returnable_url)
         else:
             print("no hay", anime_id)
             url = "https://myanimelist.net/anime/"
@@ -102,7 +105,7 @@ class ColaborativeRecommender:
                     image.save(full_url)
                     print(f"Image saved as {anime_id}.jpg")
                     
-                    return (anime_id, full_url)
+                    return (anime_id, returnable_url)
             else:
                 print(f"Failed to download image. Status code: {response.status_code}")
                 return (response.status_code, None)

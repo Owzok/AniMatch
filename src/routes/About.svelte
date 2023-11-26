@@ -1,19 +1,37 @@
 <script>
-  import { first_anime_id, anime_links } from '../store';
+  import { anime_links, anime_ids } from '../store';
 
-  let todos = null;
-  let title_val = "";
   let imageExists = false;
   let imageSrc = null;
   let mal_images = [];
-
-  const unsubscribe = first_anime_id.subscribe(value => {
-    title_val = value
-  });
+  let mal_ids = [];
 
   const unsubscribe2 = anime_links.subscribe(value => {
     mal_images = value
   });
+
+  const sus3 = anime_ids.subscribe(value => {
+    mal_ids = value
+  })
+
+  function zipArrays(arr1, arr2) {
+    return arr1.map((url, index) => ({ url, id: arr2[index] }));
+  }
+
+  let mal_data = zipArrays(mal_images, mal_ids);
+
+  function handleClick(id) {
+    current_id = id;
+    change_banner();
+  }
+  
+  function handleKeyDown(event, id) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      handleClick(id);
+    }
+  }
+
+  let current_id = mal_ids.slice(0, 1)[0];
 
   let title = "";
   let episodes = "";
@@ -23,55 +41,13 @@
   let rating = "";
   let desc = "";
 
-
-  async function fetchTodos() {
+  async function updateImage() {
   try {
-    const response = await fetch('http://127.0.0.1:5000/recommend', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title: title_val, k: 10 }),
-    });
-
-    if (response.ok) {
-      // Await the response.json() method to get the actual JSON data
-      const json = await response.json();
-
-      // Check if the 'results' property exists in the response
-      if ('results' in json) {
-        const parsedResults = JSON.parse(json.results);
-
-        const firstAnimeId = parsedResults[0].anime_id;
-        const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
-
-        title_val = firstAnimeId;
-        mal_images = restOfUrls;
-
-        console.log("First anime_id:", firstAnimeId);
-        console.log("Rest of the anime_image_urls:", restOfUrls);
-        console.log('mal_images:', mal_images);
-        retrieveInfo();
-        checkImageExists();
-        //generateImage();
-      } else {
-        console.error('Results property not found in the response:', json);
-      }
-      } else {
-        console.error('Failed to fetch data');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-
-  async function checkImageExists() {
-  try {
-    const response = await fetch(`/download/${title_val}.jpg`);
+    const response = await fetch(`/download/${current_id}.jpg`);
     imageExists = response.ok;
 
     if (imageExists) {
-      imageSrc = `/download/${title_val}.jpg`;
+      imageSrc = `/download/${current_id}.jpg`;
     } else {
       generateImage();
     }
@@ -80,14 +56,15 @@
     }
   }
 
-  async function retrieveInfo() {
+  async function updateInfo() {
   try {
+
     const response = await fetch('http://127.0.0.1:5000/get_info', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id: title_val }),
+      body: JSON.stringify({ id: current_id }),
     });
 
     if (response.ok) {
@@ -107,22 +84,27 @@
   }
 }
 
+async function change_banner(){
+  updateInfo();
+  updateImage();
+}
+
 async function generateImage() {
   const api_url = 'http://127.0.0.1:5000/scrape_image';
 
   try {
-    const response = await fetch(`/download/${title_val}.jpg`);
+    const response = await fetch(`/download/${current_id}.jpg`);
     imageExists = response.ok;
 
     if (imageExists) {
-      imageSrc = `/download/${title_val}.jpg`;
+      imageSrc = `/download/${current_id}.jpg`;
     } else {
       const response = await fetch(api_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id: title_val }),
+        body: JSON.stringify({ id: current_id }),
       });
 
       if (response.ok) {
@@ -131,7 +113,7 @@ async function generateImage() {
 
         if (responseData.success) {
           imageExists = true;
-          imageSrc = `/download/${title_val}.jpg`;
+          imageSrc = `/download/${current_id}.jpg`;
           console.log(imageExists);
         } else {
           console.error('API request was not successful:', responseData.error);
@@ -147,19 +129,17 @@ async function generateImage() {
 
   import { onMount } from 'svelte';
   onMount(() => {
-    // In the main page the scrollbar was desactivated
     document.body.style.backgroundColor = 'black';
-    document.body.style.overflowY = 'visible';
+    document.body.style.overflowY = 'visible';     // In the main page the scrollbar was desactivated
 
-    retrieveInfo();
-    checkImageExists();
 
-    //fetchTodos();
+    updateInfo();
+    updateImage();
+
 
     return () => {
-      // Desactivate scrollbar
       document.body.style.backgroundColor = ''; // or you can set it to the original color
-      document.body.style.overflowY = 'auto';
+      document.body.style.overflowY = 'auto'; // Desactivate scrollbar
     };
   })
 
@@ -168,7 +148,7 @@ async function generateImage() {
 <main>
   <div class="image-container">
     {#if imageExists}
-      <img src="/download/{title_val}.jpg" alt="" />
+      <img src="/download/{current_id}.jpg" alt="" />
     {:else}
     <img src="/download/1.jpg" alt="" />
     {/if}
@@ -193,6 +173,7 @@ async function generateImage() {
   <div class="main-recs">
         <div class="number_Recs">
             <div class="number-row">
+              <img src="./icons/2.png" alt="2">
                 <img src="./icons/2.png" alt="2">
                 <img src="./icons/3.png" alt="3">
                 <img src="./icons/4.png" alt="4">
@@ -210,13 +191,23 @@ async function generateImage() {
         </div>
         <div class="recs">
           <div class="image-row">
-            {#each mal_images.slice(0, 4) as url (url)}
-              <img src={url} alt="">
+            {#each mal_data.slice(0, 5) as { url, id } (url)}
+            <img
+              src={url}
+              alt=""
+              on:click={() => handleClick(id)}
+              on:keydown={(event) => handleKeyDown(event, id)}
+              />
             {/each}
           </div>
           <div class="image-row-s">
-            {#each mal_images.slice(4) as url (url)}
-              <img src={url} alt="">
+            {#each mal_data.slice(5) as { url, id } (url)}
+            <img
+              src={url}
+              alt=""
+              on:click={() => handleClick(id)}
+              on:keydown={(event) => handleKeyDown(event, id)}
+              />
             {/each}
           </div>
         </div>
@@ -269,7 +260,7 @@ async function generateImage() {
       position: relative;
       z-index: 4;
       width: 500px;
-      max-height: 450px;
+      height: 480px;
       margin-left: 140px;
       margin-top: 130px;
   }
@@ -363,10 +354,6 @@ async function generateImage() {
     pointer-events: none;
   }
 
-  pre{
-    color: white;
-  }
-
   .recs {
     display: flex;
     flex-direction: column;
@@ -377,7 +364,7 @@ async function generateImage() {
     display: flex;
     justify-content: center;
     margin-bottom: 20px; /* Adjust the margin as needed */
-    margin-left: 245px;
+    margin-left: 170px;
 }
 
 .image-row-s {
@@ -400,16 +387,20 @@ async function generateImage() {
 }
 
 .image-row img {
-    height: 250px;
+    height: 200px;
+    width: 141px;
+    margin-top: 45px;
     margin-bottom: 70px;
     z-index: 3;
     transition: .3s;
-    margin-right: 130px;
+    margin-right: 128px;
 }
 
 .image-row img:hover {
-    height: 275px;
+    height: 225px;
+    width: 160px;
     margin-bottom: 20px;
+    margin-right: 108px;
 }
 
 .image-row-s img {
@@ -423,6 +414,7 @@ async function generateImage() {
 .image-row-s img:hover{
     height: 225px;
     width: 160px;
+    margin-right: 108px;
 }
 
 .number_Recs {
@@ -434,7 +426,7 @@ async function generateImage() {
 }
 
 .number-row{
-    margin-left: 130px;
+  margin-left: 60px;
 }
 
 .number-row-s{
@@ -443,9 +435,9 @@ async function generateImage() {
 }
 
 .number-row img{
-    height: 225px;;
+    height: 220px;;
     z-index: 0;
-    margin-right: 190px;
+    margin-right: 155px;
 }
 
 b{

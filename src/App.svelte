@@ -4,12 +4,6 @@
 	import Credits from './routes/Credits.svelte';
 	import FAQ from './routes/FAQ.svelte';
 	import Home from './routes/Home.svelte';
-
-    import { inputValue } from './store';
-
-    let default_title = "Cowboy Bebop"
-
-    inputValue.subscribe((prev_val) => default_title = prev_val);
 </script>
 
 <Router>

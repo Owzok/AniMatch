@@ -1,6 +1,6 @@
 <script>
 	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigation
-	import { inputValue, first_anime_id, anime_links } from '../store'; // Import store
+	import { anime_links, anime_ids } from '../store'; // Import store
   import { onMount } from 'svelte'; // Import void start
   // Local variables
 	let inputValueValue = '';
@@ -14,7 +14,6 @@
     selectedModel = modelId;
     console.log('<animatch> Selected model:', modelId);
   }
-
   // Should be used when content-based is selected (model2)
 	async function anime_search() {
 		try {
@@ -32,14 +31,14 @@
 				const json = await response.json();
         if ('results' in json){
           const parsedResults = JSON.parse(json.results);
-          const firstAnimeID = parsedResults[0].anime_id;
-          const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
+          const restOfUrls = parsedResults.map(entry => entry.anime_image_url);
+          const anime_IDS = parsedResults.map(entry => entry.anime_id);
 
-          first_anime_id.set(firstAnimeID);
           anime_links.set(restOfUrls);
+          anime_ids.set(anime_IDS);
 
-          console.log("<animatch> First anime id:", firstAnimeID);
-          console.log("<animatch> Rest of the anime image urls:", restOfUrls);
+          console.log("<animatch> Anime id:", anime_IDS);
+          console.log("<animatch> Image urls:", restOfUrls);
         }
         // Navigation
         navigate('/about');
@@ -67,10 +66,10 @@
         if ('results' in json) {
           const parsedResults = JSON.parse(json.results);
           const firstAnimeId = parsedResults[0].anime_id;
-          const restOfUrls = parsedResults.slice(1).map(entry => entry.anime_image_url);
+          const restOfUrls = parsedResults.map(entry => entry.anime_image_url);
           // firstAnimeId <<store>>: ID of the best recommendation to then get its data
           // restOfUrls <<store>>: image links of the other 9 recommendations to show
-          first_anime_id.set(firstAnimeId);
+          anime_ids.set(parsedResults.map(entry => entry.anime_id));
           anime_links.set(restOfUrls);
           console.log("<animatch> First anime id:", firstAnimeId);
           console.log("<animatch> Rest of the anime image urls:", restOfUrls);
@@ -709,5 +708,4 @@ input[type="text"] {
     opacity: 0;
   }
 }
-
 </style>

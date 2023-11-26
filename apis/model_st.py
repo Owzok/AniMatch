@@ -26,4 +26,4 @@ class Content_Meta:
         return similar_id_score_pairs
 
 #mg = Content_Meta()
-#print(mg.recommend(1))
+#print(mg.recommend(1)[0])
