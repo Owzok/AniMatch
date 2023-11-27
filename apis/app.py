@@ -25,6 +25,12 @@ from PIL import Image                       # save image from google
 import pandas as pd                         # read dataframe
 from difflib import SequenceMatcher         # search title by name
 
+import os
+import concurrent.futures
+from io import BytesIO
+from bs4 import BeautifulSoup
+
+
 app = Flask(__name__)
 CORS(app) 
 cb = ContentBasedRecommender()
@@ -36,6 +42,8 @@ os.makedirs(
     name=f'{cwd}/{IMAGE_FOLDER}',
     exist_ok=True
 )
+MAIN_PATH = "../public/download/profiles/"
+RETURNABLE_PATH = "../download/profiles/"
 
 try: 
     chrome_options = ChromeOptions()
@@ -68,6 +76,49 @@ def retrieve_id(title):
 def do_filtering(data, min_score=1, max_score=10, min_episodes=1, max_episodes=10000, min_year=1970, max_year=2023):
     return data[(data['Score'] >= min_score) & (data['Score'] <= max_score) & (data['Episodes'] >= min_episodes) & (data['Episodes'] <= max_episodes) & (data['Year'] >= min_year) & (data['Year'] <= max_year) & (data['Year'] >= min_year)]
 
+
+def save_image(anime_id):
+    full_url = MAIN_PATH+f"{anime_id}.jpg"
+    returnable_url = RETURNABLE_PATH+f"{anime_id}.jpg"
+    if os.path.isfile(full_url):
+        print("si hay", anime_id)
+        return (anime_id, returnable_url)
+    else:
+        print("no hay", anime_id)
+        url = "https://myanimelist.net/anime/"
+        response = requests.get(url+str(anime_id))
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            div_tag = soup.find('div', {'class': 'leftside'})
+            img_tag = div_tag.find('img') if div_tag else None
+            if img_tag:
+                img_url = img_tag['data-src']
+
+                response = requests.get(img_url)
+                image_data = response.content
+                image = Image.open(BytesIO(image_data))
+                
+                image.save(full_url)
+                print(f"Image saved as {anime_id}.jpg")
+                
+                return (anime_id, returnable_url)
+        else:
+            print(f"Failed to download image. Status code: {response.status_code}")
+            return (response.status_code, None)
+
+def get_lst_images(lst_recommend):
+    imgs_anime = {}
+    with concurrent.futures.ThreadPoolExecutor() as mainExecutor:
+        future_execution = [mainExecutor.submit(save_image,
+                                            anime)
+                            for anime in lst_recommend]
+        if future_execution is not None: 
+            for future in concurrent.futures.as_completed(future_execution):
+                resultado = future.result()
+                if resultado is not None: 
+                    imgs_anime[resultado[0]] = resultado[1]
+    return imgs_anime
+
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
 def get_recommendations():
@@ -78,7 +129,22 @@ def get_recommendations():
         return jsonify({"error": "<animatch> Invalid request. Make sure 'username' is provided."})
 
     data_new_user = pd.read_csv(f"../public/users/{username}.csv")
-    titles, id_ratings, lst_id_url = cf.recommend(data_new_user, 10)
+    nuevo_df, lst_anime, anime_id_ratings = cf.recommend(data_new_user, 10)
+
+    #Hacer todos los filtros en nuevo_df
+
+    anime_titles =nuevo_df["Title"].tolist()
+    anime_id =nuevo_df.index
+
+    anime_id = anime_id[:10]
+    anime_titles = anime_titles[:10]
+    anime_id_ratings = anime_id_ratings[:10]
+
+    lst_id_url = []
+    lst_url = get_lst_images(anime_id)
+    for x in range(len(anime_id)):
+        animeid = anime_id[x]
+        lst_id_url.append((animeid, lst_url[animeid]))
 
     jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url} for anime_id, anime_image_url in lst_id_url]
     json_data = json.dumps(jsonifiable_data)

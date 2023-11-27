@@ -25,8 +25,10 @@ import os
 import concurrent.futures
 from io import BytesIO
 
-NUM_COMPONENTS = 30
-MODEL_LOSS = "warp"
+NUM_COMPONENTS = 100
+MODEL_LOSS = "bpr"
+MODEL = "model_bpr_100_2500000"
+DATASET = "dataset_save100_2500000"
 MAIN_PATH = "../public/download/profiles/"
 RETURNABLE_PATH = "../download/profiles/"
 
@@ -45,9 +47,9 @@ TO DO:
 
 class ColaborativeRecommender:
     def __init__(self):
-        with open("./models/model_"+MODEL_LOSS+"_1.pkl", 'rb') as model_file:
+        with open("./models/"+MODEL+".pkl", 'rb') as model_file:
             self.model = pickle.load(model_file)
-        with open("./models/dataset_save.pkl", 'rb') as dataset_file:
+        with open("./models/"+DATASET+".pkl", 'rb') as dataset_file:
             self.df = pickle.load(dataset_file)
 
         self.map_animes = self.df.mapping()[2]
@@ -182,7 +184,7 @@ class ColaborativeRecommender:
 
         return projected_user_embedding
 
-    def predict_N_best_recommendations(self, map_watched, projected_user_embedding, N=10):
+    def predict_best_recommendations(self, map_watched, projected_user_embedding, N=10):
         predicted_ratings = np.dot(projected_user_embedding, self.item_embeddings.T) + self.item_biases
         predicted_ratings = predicted_ratings[0]
         top_N_indices = np.argsort(predicted_ratings)[::-1]
@@ -196,7 +198,7 @@ class ColaborativeRecommender:
                 if len(title_original):
                     lst_top_recommendations.append(self.get_anime_originalID(id))
                     lst_animes_ratings.append((self.get_anime_originalID(id), rating))
-        return lst_top_recommendations[:N], lst_animes_ratings[:N]
+        return lst_top_recommendations, lst_animes_ratings
 
     def recommend(self, data_new_user, K_to_recommend=10):
         modelo_new, interactions_new, weights_new = self.new_user_model(data_new_user)
@@ -206,30 +208,35 @@ class ColaborativeRecommender:
 
         projected_user_embedding = self.generate_embeds(modelo_new, map_watched)
 
-        lst_top_recommendations, lst_animes_ratings = self.predict_N_best_recommendations(map_watched, projected_user_embedding, K_to_recommend)
+        lst_top_recommendations, anime_id_ratings = self.predict_best_recommendations(map_watched, projected_user_embedding, K_to_recommend)
 
         #self.try_outs(self.get_lst_images(lst_top_recommendations), lst_top_recommendations)
         ids_en_df = self.anime_titles[self.anime_titles['Id'].isin(lst_top_recommendations)]
+        ids_en_df = ids_en_df.drop_duplicates(subset="Id")
         nuevo_df =  pd.DataFrame(ids_en_df, columns=['Id', "Title"]).set_index('Id').reindex(lst_top_recommendations)
+        
+        """
         anime_titles =nuevo_df["Title"].tolist()
         anime_id =nuevo_df.index
 
+        
         lst_id_url = []
         lst_url = self.get_lst_images(anime_id)
         for x in range(len(anime_id)):
             animeid = anime_id[x]
             lst_id_url.append((animeid, lst_url[animeid]))
+        """
+        return nuevo_df, lst_top_recommendations, anime_id_ratings
 
-        return anime_titles, lst_animes_ratings, lst_id_url
-    
-#cl = ColaborativeRecommender()
-#data_new_user = pd.read_csv("./data/user_tests/new_user.csv")
-#titles, id_ratings, lst_id_url = cl.recommend(data_new_user, 10)
-"""
-print(lst_id_url)
 
-for elem in range(len(id_ratings)):
+
+cl = ColaborativeRecommender()
+data_new_user = pd.read_csv("./data/user_tests/andre.csv")
+nuevo_df, lst_anime, anime_id_ratings = cl.recommend(data_new_user, 10)
+
+titles = nuevo_df["Title"].tolist()
+
+
+for elem in range(len(anime_id_ratings[:10])):
     print("Anime: ", titles[elem])
-    print("con score ", id_ratings[elem][1])
-
-"""
+    print("con score ", anime_id_ratings[elem][1])
