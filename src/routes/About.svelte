@@ -1,10 +1,11 @@
 <script>
-  import { anime_links, anime_ids } from '../store';
+  import { anime_links, anime_ids, all_data } from '../store';
 
   let imageExists = false;
   let imageSrc = null;
   let mal_images = [];
   let mal_ids = [];
+  let fetched_data = [];
 
   // Sliders Set 1
   let fromSlider1;
@@ -38,6 +39,18 @@
     mal_ids = value
   })
 
+  const sus_alldata = all_data.subscribe(value => {
+    fetched_data = value
+  })
+
+  // FILTER IDS
+  let filtered_ids = [];
+  let movie_ids = [];
+  let short_ids = [];
+  let long_ids = [];
+  let old_ids = [];
+  let newer_ids = [];
+
   function zipArrays(arr1, arr2) {
     return arr1.map((url, index) => ({ url, id: arr2[index] }));
   }
@@ -60,10 +73,10 @@
   let title = "";
   let episodes = "";
   let type = "";
-  let premiere = "";
   let studio = "";
   let rating = "";
   let desc = "";
+  let genres = "";
 
   async function updateImage() {
   try {
@@ -95,11 +108,11 @@
       const data = await response.json();
       title = data.Name;
       episodes = data.Episodes;
-      premiere = data.Premiered;
       studio = data.Studios;
       type = data.Type;
       desc = data.synopsis;
       rating = data.Rating;
+      genres = data.Genres;
     } else {
       console.error('Failed to fetch data');
     }
@@ -112,6 +125,209 @@ async function change_banner(){
   updateInfo();
   updateImage();
 }
+
+
+async function movieFilter(){
+    const response = await fetch('http://127.0.0.1:5000/filter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        min_episodes: 1,
+        max_episodes: 1,
+        fetched_data: fetched_data
+      }),
+    });
+
+    if (response.ok) {
+      const filteredData = await response.json();
+
+      console.log('Filtered Data:', filteredData);
+      movie_ids = filteredData;
+      
+      await fetch('http://127.0.0.1:5000/profile_pics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: filteredData
+        }),
+      });
+    } else {
+      console.error('Failed to fetch data');
+    }
+  }
+
+  async function shortFilter(){
+    const response = await fetch('http://127.0.0.1:5000/filter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        min_episodes: 6,
+        max_episodes: 13,
+        fetched_data: fetched_data
+      }),
+    });
+
+    if (response.ok) {
+      const filteredData = await response.json();
+
+      console.log('Filtered Data:', filteredData);
+      short_ids = filteredData;
+      
+      await fetch('http://127.0.0.1:5000/profile_pics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: filteredData
+        }),
+      });
+    } else {
+      console.error('Failed to fetch data');
+    }
+  }
+
+  async function longFilter(){
+    const response = await fetch('http://127.0.0.1:5000/filter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        min_episodes: 50,
+        fetched_data: fetched_data
+      }),
+    });
+
+    if (response.ok) {
+      const filteredData = await response.json();
+
+      console.log('Filtered Data:', filteredData);
+      long_ids = filteredData;
+      
+      await fetch('http://127.0.0.1:5000/profile_pics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: filteredData
+        }),
+      });
+    } else {
+      console.error('Failed to fetch data');
+    }
+  }
+
+  async function oldFilter(){
+    const response = await fetch('http://127.0.0.1:5000/filter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        max_year: 2003,
+        fetched_data: fetched_data
+      }),
+    });
+
+    if (response.ok) {
+      const filteredData = await response.json();
+
+      console.log('Filtered Data:', filteredData);
+      old_ids = filteredData;
+      
+      await fetch('http://127.0.0.1:5000/profile_pics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: filteredData
+        }),
+      });
+    } else {
+      console.error('Failed to fetch data');
+    }
+  }
+
+  async function newerFilter(){
+    const response = await fetch('http://127.0.0.1:5000/filter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        min_year: 2018,
+        fetched_data: fetched_data
+      }),
+    });
+
+    if (response.ok) {
+      const filteredData = await response.json();
+
+      console.log('Filtered Data:', filteredData);
+      newer_ids = filteredData;
+      
+      await fetch('http://127.0.0.1:5000/profile_pics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: filteredData
+        }),
+      });
+    } else {
+      console.error('Failed to fetch data');
+    }
+  }
+
+  async function applyFilters(){
+    const response = await fetch('http://127.0.0.1:5000/filter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        min_score: from_val2,
+        max_score: to_val2,
+        min_episodes: from_val1,
+        max_episodes: to_val1,
+        min_year: from_val3,
+        max_year: to_val3,
+        fetched_data: fetched_data
+      }),
+    });
+
+    if (response.ok) {
+      const filteredData = await response.json();
+
+      console.log('Filtered Data:', filteredData);
+      filtered_ids = filteredData;
+      
+      await fetch('http://127.0.0.1:5000/profile_pics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: filteredData
+        }),
+      });
+
+      //sendToRecommendRoute(filteredData);
+    } else {
+      console.error('Failed to fetch data');
+    }
+  }
+
 
 async function generateImage() {
   const api_url = 'http://127.0.0.1:5000/scrape_image';
@@ -158,6 +374,11 @@ async function generateImage() {
 
     updateInfo();
     updateImage();
+    movieFilter();
+    shortFilter();
+    newerFilter();
+    longFilter();
+    oldFilter();
 
     fromSlider1 = document.querySelector('#fromSlider1');
     toSlider1 = document.querySelector('#toSlider1');
@@ -292,7 +513,6 @@ async function generateImage() {
     from_val3 = from;
     to_val3 = to;
   }
-  
 
   function getParsed(currentFrom, currentTo) {
     const from = parseInt(currentFrom.value, 10);
@@ -337,15 +557,16 @@ async function generateImage() {
     <ul>
         <li>{episodes} Episodes</li>
         <li>{type}</li>
-        <li>{premiere}</li>
         <li>{studio}</li>
         <!--<li>{rating}</li>-->
     </ul>
     <p class="desc">
         {desc}
     </p>
-    <p class="Genres">Avant Garde, Comedy, Drama, Mystery, Supernatural, Psychological</p>
-    <button>MyAnimeList</button>
+    <p class="Genres">{genres}</p>
+    <a href="https://myanimelist.net/anime/{current_id}" target="_blank">
+      <img src="/icons/mal-logo.jpeg" alt="MyAnimeList" class="mal-logo">
+    </a>
   </div>
   <h2>Best recommendations for you</h2>
   <div class="main-recs">
@@ -379,7 +600,7 @@ async function generateImage() {
             {/each}
           </div>
           <div class="image-row-s">
-            {#each mal_data.slice(5) as { url, id } (url)}
+            {#each mal_data.slice(5, 11) as { url, id } (url)}
             <img
               src={url}
               alt=""
@@ -392,7 +613,7 @@ async function generateImage() {
     </div>
     <div>
 
-    <div class="sliders">
+    <div class="sliders" style="margin-bottom: 70px;">
       <div class="range_container">
         <div class="sliders_control">
           <input id="fromSlider1" type="range" value="1" min="1" max="99"/>
@@ -441,30 +662,72 @@ async function generateImage() {
               <p class="test" id="fromInput3">{ from_val3 }&nbsp;-</p>
             </div>
             <div class="form_control_container">
-            <p class="test" id="toInput3">&nbsp;{ to_val3 }</p>
+              <p class="test" id="toInput3">&nbsp;{ to_val3 }</p>
             </div>
           </div>
         </div>
       </div>
+      <button class="filter-btn" on:click={applyFilters}>Fetch Data</button>
     </div>
-
-
     </div>
-    <h2>Best <b>MOVIE</b> recommendations for you</h2>
+    {#if filtered_ids.length > 0}
     <div class="image-row-l">
-      {#each mal_images.slice(0, 6) as url (url)}
-        <img src={url} alt="">
+      {#each filtered_ids.slice(0, 6) as id (id)}
+        <img src={`../download/profiles/${id}.jpg`} alt="" on:click={() => handleClick(id)} on:keydown={(event) => handleKeyDown(event, id)}>
       {/each}
     </div>
-    <h2>Anime with less than <b>13</b> episodes</h2>
+    {:else}
+      <p>Try using the filters !</p>
+    {/if}
+
+    <h2><b>Cinematic Gems</b> Tailored Just for You</h2>
     <div class="image-row-l">
-      {#each mal_images.slice(3, 9) as url (url)}
-        <img src={url} alt="">
+      {#each movie_ids.slice(0, 6) as id (id)}
+        <img src={`../download/profiles/${id}.jpg`} alt="">
+      {/each}
+    </div>
+    <h2><b>Binge-Worthy Short Stories:</b> Anime Under 13 Episodes</h2>
+    <div class="image-row-l">
+      {#each short_ids.slice(0, 6) as id (id)}
+        <img src={`../download/profiles/${id}.jpg`} alt="">
+      {/each}
+    </div>
+    <h2><b>Epic Journeys Unfold:</b> Anime with 50+ Episodes</h2>
+    <div class="image-row-l">
+      {#each long_ids.slice(0, 6) as id (id)}
+        <img src={`../download/profiles/${id}.jpg`} alt="">
+      {/each}
+    </div>
+    <h2><b>Timeless Classics:</b> Dive into the World of Vintage Anime</h2>
+    <div class="image-row-l">
+      {#each old_ids.slice(0, 6) as id (id)}
+        <img src={`../download/profiles/${id}.jpg`} alt="">
+      {/each}
+    </div>
+    <h2><b>Fresh and Exciting:</b> Discover the Latest Anime Adventures</h2>
+    <div class="image-row-l">
+      {#each newer_ids.slice(0, 6) as id (id)}
+        <img src={`../download/profiles/${id}.jpg`} alt="">
       {/each}
     </div>
 </main>
 
 <style>
+
+.filter-btn{
+  position: absolute;
+  left: 40%;
+  width: 300px;
+  border: none;
+  background-color: rgba(37, 218, 165, 1);
+  border-radius: 10px;
+  color: black;
+  font-family: 'Lato', sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 80px;
+}
 
 .sliders{
   display: flex;
@@ -477,11 +740,18 @@ async function generateImage() {
   font-size: 18px;
 }
 
+.mal-logo {
+    width: 100px; 
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
 .range_container {
   display: flex;
   flex-direction: column;
   width: 20%;
-  margin: 100px auto;
+  margin: 20px auto;
 }
 
 .sliders_control {
@@ -700,12 +970,20 @@ input[type="range"] {
     justify-content: flex-start;
     margin-left: 130px;
     margin-top: 30px;
-    margin-bottom: 70px;
 }
 
 .image-row-l img{
-    margin-right: 20px;
-    width: 500px;
+  height: 330px;
+  width: 225px;
+  margin-right: 20px;
+  transition: .3s;
+  margin-bottom: 70px;
+}
+
+.image-row-l img:hover{
+  height: 350px;
+  width: 235px;
+  margin-bottom: 10px;
 }
 
 .image-row img {

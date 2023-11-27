@@ -1,6 +1,6 @@
 <script>
 	import { Link, Router, navigate } from 'svelte-routing'; // Import the navigation
-	import { anime_links, anime_ids } from '../store'; // Import store
+	import { anime_links, anime_ids, all_data } from '../store'; // Import store
   import { onMount } from 'svelte'; // Import void start
   // Local variables
 	let inputValueValue = '';
@@ -67,12 +67,15 @@
           const parsedResults = JSON.parse(json.results);
           const firstAnimeId = parsedResults[0].anime_id;
           const restOfUrls = parsedResults.map(entry => entry.anime_image_url);
+          const for_filter = parsedResults.map(entry => entry.score);
+
           // firstAnimeId <<store>>: ID of the best recommendation to then get its data
           // restOfUrls <<store>>: image links of the other 9 recommendations to show
           anime_ids.set(parsedResults.map(entry => entry.anime_id));
           anime_links.set(restOfUrls);
-          console.log("<animatch> First anime id:", firstAnimeId);
-          console.log("<animatch> Rest of the anime image urls:", restOfUrls);
+          all_data.set(for_filter);
+          //console.log("<animatch> First anime id:", firstAnimeId);
+          //console.log("<animatch> Rest of the anime image urls:", restOfUrls);
           // Navigation
           navigate('/about');
         }

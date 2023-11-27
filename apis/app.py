@@ -4,6 +4,7 @@ from model_content import ContentBasedRecommender
 from colab import ColaborativeRecommender
 from flask_cors import CORS, cross_origin
 
+import ast 
 import json
 import time                                 # time.sleep
 import base64                               # save image in base 64
@@ -59,7 +60,7 @@ except:
 
 SLEEP_TIME = 1
 
-df = pd.read_csv("./data/anime.csv", index_col="MAL_ID")
+df = pd.read_csv("./data/data_anime_clean.csv", index_col="Id")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
 data = pd.read_csv("./data/data4filter.csv")
 
@@ -74,6 +75,8 @@ def retrieve_id(title):
     return df['r'].idxmax()
 
 def do_filtering(data, min_score=1, max_score=10, min_episodes=1, max_episodes=10000, min_year=1970, max_year=2023):
+    if max_episodes == 100:
+        max_episodes = 10000
     return data[(data['Score'] >= min_score) & (data['Score'] <= max_score) & (data['Episodes'] >= min_episodes) & (data['Episodes'] <= max_episodes) & (data['Year'] >= min_year) & (data['Year'] <= max_year) & (data['Year'] >= min_year)]
 
 
@@ -119,6 +122,13 @@ def get_lst_images(lst_recommend):
                     imgs_anime[resultado[0]] = resultado[1]
     return imgs_anime
 
+@app.route('/profile_pics', methods=['POST'])
+def get_pfps():
+    data = request.json
+    ids = data.get('ids')
+    get_lst_images(ids)
+    return jsonify({ "results": "Success" })
+
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
 def get_recommendations():
@@ -136,20 +146,25 @@ def get_recommendations():
     anime_titles =nuevo_df["Title"].tolist()
     anime_id =nuevo_df.index
 
-    anime_id = anime_id[:10]
-    anime_titles = anime_titles[:10]
-    anime_id_ratings = anime_id_ratings[:10]
+    anime_id = anime_id
+    anime_titles = anime_titles
+    anime_id_ratings = anime_id_ratings
 
     lst_id_url = []
-    lst_url = get_lst_images(anime_id)
-    for x in range(len(anime_id)):
-        animeid = anime_id[x]
-        lst_id_url.append((animeid, lst_url[animeid]))
+    lst_url = get_lst_images(anime_id[:10])
 
-    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url} for anime_id, anime_image_url in lst_id_url]
+    for x in range(10):
+        animeid = anime_id[x]
+        lst_id_url.append((animeid, lst_url[animeid], str(anime_id_ratings[x])))
+
+    for x in (range(len(anime_id_ratings[10:]))):
+        animeid = anime_id[0]
+        lst_id_url.append((animeid, lst_url[animeid], str(anime_id_ratings[10 + x])))
+
+    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url, 'score': score} for anime_id, anime_image_url, score in lst_id_url]
     json_data = json.dumps(jsonifiable_data)
 
-    return jsonify({"results": json_data})
+    return jsonify({ "results": json_data })
 
 @app.route('/anirec', methods=['POST'])
 @cross_origin()
@@ -249,7 +264,7 @@ def get_info():
         return " ".join(str(item) for item in f_text)    
 
     desc = get_length_text(id)
-    fields = ['Name', 'Type', 'Episodes', 'Premiered', 'Studios', 'Rating']
+    fields = ['Name', 'Type', 'Episodes', 'Studios', 'Rating', 'Genres']
     filtered_data = df.loc[id, fields]
     result_dict = filtered_data.to_dict()
     result_dict['synopsis'] = desc
@@ -333,7 +348,7 @@ def scrape_image():
             value='//*[@id="APjFqb"]'
         )
 
-        box.send_keys(search_query+" screencap filetype:jpg OR filetype:jpeg OR filetype:png imagesize:1920x1080")
+        box.send_keys(search_query+" anime imagesize:1920x1080 filetype:jpg OR filetype:png")
         box.send_keys(Keys.ENTER)
         time.sleep(SLEEP_TIME)
 
@@ -417,13 +432,19 @@ def filter_data():
     max_episodes = int(content.get('max_episodes', 10000))
     min_year = int(content.get('min_year', 1970))
     max_year = int(content.get('max_year', 2023))
+    fetched_data_str = content.get('fetched_data', [])
+    fetched_data = [ast.literal_eval(item) for item in fetched_data_str]
+    df = pd.DataFrame(fetched_data, columns=['Id', 'model_score'])
 
-    filtered_data = do_filtering(data, min_score, max_score, min_episodes, max_episodes, min_year, max_year)
+    final_df = pd.merge(df, data, on="Id")
 
-    result_df = pd.DataFrame(filtered_data, columns=['Id', 'model_score'])
+    filtered_data = do_filtering(final_df, min_score=min_score, max_score=max_score, min_episodes=min_episodes, max_episodes=max_episodes, min_year=min_year, max_year=max_year)
 
+    result_df = pd.DataFrame(filtered_data)
+    print(result_df)
+    print(result_df['Id'].values)
     # You can return the result as JSON
-    return jsonify(filtered_data.to_dict(orient='records'))
+    return jsonify(result_df['Id'][:10].values.tolist())
 
 if __name__ == '__main__':
     app.run(debug=True)

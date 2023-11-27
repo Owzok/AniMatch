@@ -1,10 +1,10 @@
 import requests
 import numpy as np
 
-api_url = 'http://127.0.0.1:5000/filter'  # Replace with the actual URL of your API
+api_url = 'http://127.0.0.1:5000/recommend'  # Replace with the actual URL of your API
 
 request_data = {
-    'min_score': '9'
+    'username': 'Owzok'
 }
 
 response = requests.post(api_url, json=request_data)

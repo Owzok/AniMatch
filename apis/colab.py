@@ -25,10 +25,10 @@ import os
 import concurrent.futures
 from io import BytesIO
 
-NUM_COMPONENTS = 100
+NUM_COMPONENTS = 30
 MODEL_LOSS = "bpr"
-MODEL = "model_bpr_100_2500000"
-DATASET = "dataset_save100_2500000"
+MODEL = "model_warp_1"
+DATASET = "dataset_save"
 MAIN_PATH = "../public/download/profiles/"
 RETURNABLE_PATH = "../download/profiles/"
 
@@ -229,14 +229,16 @@ class ColaborativeRecommender:
         return nuevo_df, lst_top_recommendations, anime_id_ratings
 
 
+#cl = ColaborativeRecommender()
+#data_new_user = pd.read_csv("./data/user_tests/andre.csv")
+#nuevo_df, lst_anime, anime_id_ratings = cl.recommend(data_new_user, 10000)
 
-cl = ColaborativeRecommender()
-data_new_user = pd.read_csv("./data/user_tests/andre.csv")
-nuevo_df, lst_anime, anime_id_ratings = cl.recommend(data_new_user, 10)
+#print(anime_id_ratings[10:20])
 
+"""
 titles = nuevo_df["Title"].tolist()
 
-
-for elem in range(len(anime_id_ratings[:10])):
+for elem in range(len(anime_id_ratings)):
     print("Anime: ", titles[elem])
     print("con score ", anime_id_ratings[elem][1])
+"""
