@@ -53,7 +53,7 @@ SLEEP_TIME = 1
 
 df = pd.read_csv("./data/anime.csv", index_col="MAL_ID")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
-data_new_user = pd.read_csv("./data/user_tests/andre.csv")
+data = pd.read_csv("./data/data4filter.csv")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -64,6 +64,9 @@ def retrieve_id(title):
 
     df['r'] = df.apply(lambda x: similar(x.Name, title), axis=1)
     return df['r'].idxmax()
+
+def do_filtering(data, min_score=1, max_score=10, min_episodes=1, max_episodes=10000, min_year=1970, max_year=2023):
+    return data[(data['Score'] >= min_score) & (data['Score'] <= max_score) & (data['Episodes'] >= min_episodes) & (data['Episodes'] <= max_episodes) & (data['Year'] >= min_year) & (data['Year'] <= max_year) & (data['Year'] >= min_year)]
 
 @app.route('/recommend', methods=['POST'])
 @cross_origin()
@@ -337,6 +340,24 @@ def scrape_image():
             "message": f"scrapped Image for query: {search_query}."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/filter', methods=['POST'])
+def filter_data():
+    content = request.json
+
+    min_score = int(content.get('min_score', 1))
+    max_score = int(content.get('max_score', 10))
+    min_episodes = int(content.get('min_episodes', 1))
+    max_episodes = int(content.get('max_episodes', 10000))
+    min_year = int(content.get('min_year', 1970))
+    max_year = int(content.get('max_year', 2023))
+
+    filtered_data = do_filtering(data, min_score, max_score, min_episodes, max_episodes, min_year, max_year)
+
+    result_df = pd.DataFrame(filtered_data, columns=['Id', 'model_score'])
+
+    # You can return the result as JSON
+    return jsonify(filtered_data.to_dict(orient='records'))
 
 if __name__ == '__main__':
     app.run(debug=True)

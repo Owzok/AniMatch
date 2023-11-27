@@ -6,6 +6,30 @@
   let mal_images = [];
   let mal_ids = [];
 
+  // Sliders Set 1
+  let fromSlider1;
+  let toSlider1;
+  let fromInput1;
+  let toInput1;
+  let from_val1 = 1;
+  let to_val1 = 100;
+
+  // Sliders Set 2
+  let fromSlider2;
+  let toSlider2;
+  let fromInput2;
+  let toInput2;
+  let from_val2 = 1;
+  let to_val2 = 10;
+
+  // Sliders Set 3
+  let fromSlider3;
+  let toSlider3;
+  let fromInput3;
+  let toInput3;
+  let from_val3 = 1970;
+  let to_val3 = 2023;
+
   const unsubscribe2 = anime_links.subscribe(value => {
     mal_images = value
   });
@@ -132,9 +156,49 @@ async function generateImage() {
     document.body.style.backgroundColor = 'black';
     document.body.style.overflowY = 'visible';     // In the main page the scrollbar was desactivated
 
-
     updateInfo();
     updateImage();
+
+    fromSlider1 = document.querySelector('#fromSlider1');
+    toSlider1 = document.querySelector('#toSlider1');
+    fromInput1 = document.querySelector('#fromInput1');
+    toInput1 = document.querySelector('#toInput1');
+
+    // Initialize the slider appearance for Set 1
+    fillSlider(fromSlider1, toSlider1, '#C6C6C6', '#25daa5', toSlider1);
+    setToggleAccessible(toSlider1, toInput1);
+
+    // Event listeners for Set 1
+    fromSlider1.oninput = () => controlFromSlider(fromSlider1, toSlider1, fromInput1);
+    toSlider1.oninput = () => controlToSlider(fromSlider1, toSlider1, fromInput1);
+
+    // Assign the elements for Set 2
+    fromSlider2 = document.querySelector('#fromSlider2');
+    toSlider2 = document.querySelector('#toSlider2');
+    fromInput2 = document.querySelector('#fromInput2');
+    toInput2 = document.querySelector('#toInput2');
+
+    // Initialize the slider appearance for Set 2
+    fillSlider(fromSlider2, toSlider2, '#C6C6C6', '#25daa5', toSlider2);
+    setToggleAccessible(toSlider2, toInput2);
+
+    // Event listeners for Set 2
+    fromSlider2.oninput = () => controlFromSlider2(fromSlider2, toSlider2, fromInput2);
+    toSlider2.oninput = () => controlFromSlider2(fromSlider2, toSlider2, fromInput2);
+
+    // Assign the elements for Set 3
+    fromSlider3 = document.querySelector('#fromSlider3');
+    toSlider3 = document.querySelector('#toSlider3');
+    fromInput3 = document.querySelector('#fromInput3');
+    toInput3 = document.querySelector('#toInput3');
+
+    // Initialize the slider appearance for Set 3
+    fillSlider(fromSlider3, toSlider3, '#C6C6C6', '#25daa5', toSlider3);
+    setToggleAccessible(toSlider3, toInput3);
+
+    // Event listeners for Set 3
+    fromSlider3.oninput = () => controlFromSlider3(fromSlider3, toSlider3, fromInput3);
+    toSlider3.oninput = () => controlFromSlider3(fromSlider3, toSlider3, fromInput3);
 
 
     return () => {
@@ -143,6 +207,120 @@ async function generateImage() {
     };
   })
 
+  // Slider
+
+  function controlFromSlider(fromSlider, toSlider, fromInput) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#25daa5', toSlider);
+    if (from > to) {
+      fromSlider.value = to;
+      fromInput.value = to;
+    } else {
+      fromInput.value = from;
+    }
+    from_val1 = from;
+    to_val1 = to;
+  }
+
+  function controlToSlider(fromSlider, toSlider, toInput) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#25daa5', toSlider);
+    setToggleAccessible(toSlider, toInput); // Pass toInput to setToggleAccessible
+    if (from <= to) {
+      toSlider.value = to;
+      toInput.value = to;
+    } else {
+      toInput.value = from;
+      toSlider.value = from;
+    }
+    from_val1 = from;
+    to_val1 = to;
+  }
+
+  function controlFromSlider2(fromSlider, toSlider, fromInput) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#25daa5', toSlider);
+    if (from > to) {
+      fromSlider.value = to;
+      fromInput.value = to;
+    } else {
+      fromInput.value = from;
+    }
+    from_val2 = from;
+    to_val2 = to;
+  }
+
+  function controlToSlider2(fromSlider, toSlider, toInput) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#25daa5', toSlider);
+    setToggleAccessible(toSlider, toInput); // Pass toInput to setToggleAccessible
+    if (from <= to) {
+      toSlider.value = to;
+      toInput.value = to;
+    } else {
+      toInput.value = from;
+      toSlider.value = from;
+    }
+    from_val2 = from;
+    to_val2 = to;
+  }
+
+  function controlFromSlider3(fromSlider, toSlider, fromInput) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#25daa5', toSlider);
+    if (from > to) {
+      fromSlider.value = to;
+      fromInput.value = to;
+    } else {
+      fromInput.value = from;
+    }
+    from_val3 = from;
+    to_val3 = to;
+  }
+
+  function controlToSlider3(fromSlider, toSlider, toInput) {
+    const [from, to] = getParsed(fromSlider, toSlider);
+    fillSlider(fromSlider, toSlider, '#C6C6C6', '#25daa5', toSlider);
+    setToggleAccessible(toSlider, toInput); // Pass toInput to setToggleAccessible
+    if (from <= to) {
+      toSlider.value = to;
+      toInput.value = to;
+    } else {
+      toInput.value = from;
+      toSlider.value = from;
+    }
+    from_val3 = from;
+    to_val3 = to;
+  }
+  
+
+  function getParsed(currentFrom, currentTo) {
+    const from = parseInt(currentFrom.value, 10);
+    const to = parseInt(currentTo.value, 10);
+    return [from, to];
+  }
+
+  function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
+    const rangeDistance = to.max-to.min;
+    const fromPosition = from.value - to.min;
+    const toPosition = to.value - to.min;
+    controlSlider.style.background = `linear-gradient(
+      to right,
+      ${sliderColor} 0%,
+      ${sliderColor} ${(fromPosition)/(rangeDistance)*100}%,
+      ${rangeColor} ${((fromPosition)/(rangeDistance))*100}%,
+      ${rangeColor} ${(toPosition)/(rangeDistance)*100}%, 
+      ${sliderColor} ${(toPosition)/(rangeDistance)*100}%, 
+      ${sliderColor} 100%)`;
+  }
+
+  function setToggleAccessible(currentTarget, toInput) {
+    if (Number(toInput.value) <= 0) {
+      currentTarget.style.zIndex = 2;
+    } else {
+      currentTarget.style.zIndex = 0;
+    }
+  }
 </script>
 
 <main>
@@ -173,7 +351,7 @@ async function generateImage() {
   <div class="main-recs">
         <div class="number_Recs">
             <div class="number-row">
-              <img src="./icons/2.png" alt="2">
+              <img src="./icons/1.png" alt="1">
                 <img src="./icons/2.png" alt="2">
                 <img src="./icons/3.png" alt="3">
                 <img src="./icons/4.png" alt="4">
@@ -212,6 +390,66 @@ async function generateImage() {
           </div>
         </div>
     </div>
+    <div>
+
+    <div class="sliders">
+      <div class="range_container">
+        <div class="sliders_control">
+          <input id="fromSlider1" type="range" value="1" min="1" max="99"/>
+          <input id="toSlider1" type="range" value="100" min="2" max="100"/>
+        </div>
+        <div class="form_control">
+          <p class="test" id="fromInput1">Episodes:</p>
+          <div class="sections">
+            <div class="form_control_container">
+              <p class="test" id="fromInput1">{ from_val1 }&nbsp;-</p>
+            </div>
+            <div class="form_control_container">
+            <p class="test" id="toInput1">&nbsp;{ to_val1 }</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="range_container">
+        <div class="sliders_control">
+          <input id="fromSlider2" type="range" value="1" min="1" max="9"/>
+          <input id="toSlider2" type="range" value="10" min="2" max="10"/>
+        </div>
+        <div class="form_control">
+          <p class="test" id="fromInput2">Score:</p>
+          <div class="sections">
+            <div class="form_control_container">
+              <p class="test" id="fromInput2">{ from_val2 }&nbsp;-</p>
+            </div>
+            <div class="form_control_container">
+            <p class="test" id="toInput2">&nbsp;{ to_val2 }</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="range_container">
+        <div class="sliders_control">
+          <input id="fromSlider3" type="range" value="1970" min="1970" max="2022"/>
+          <input id="toSlider3" type="range" value="2022" min="1971" max="2023"/>
+        </div>
+        <div class="form_control">
+          <p class="test" id="fromInput3">Year:</p>
+          <div class="sections">
+            <div class="form_control_container">
+              <p class="test" id="fromInput3">{ from_val3 }&nbsp;-</p>
+            </div>
+            <div class="form_control_container">
+            <p class="test" id="toInput3">&nbsp;{ to_val3 }</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    </div>
     <h2>Best <b>MOVIE</b> recommendations for you</h2>
     <div class="image-row-l">
       {#each mal_images.slice(0, 6) as url (url)}
@@ -227,6 +465,90 @@ async function generateImage() {
 </main>
 
 <style>
+
+.sliders{
+  display: flex;
+  justify-content: space-between;
+}
+
+.test{
+  color: white;
+  font-family: 'LatoLight', sans-serif;
+  font-size: 18px;
+}
+
+.range_container {
+  display: flex;
+  flex-direction: column;
+  width: 20%;
+  margin: 100px auto;
+}
+
+.sliders_control {
+  position: relative;
+  min-height: 20px;
+}
+
+.sections{
+  position: relative;
+  display: flex;
+  font-size: 24px;
+  color: #635a5a;
+}
+
+.form_control {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  font-size: 24px;
+  color: #635a5a;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: all;
+  width: 24px;
+  height: 24px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #C6C6C6;
+  cursor: pointer;
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: all;
+  width: 24px;
+  height: 24px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #C6C6C6;
+  cursor: pointer;  
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  background: #f7f7f7;
+}
+
+input[type=range]::-webkit-slider-thumb:active {
+  box-shadow: inset 0 0 3px #387bbe, 0 0 9px #387bbe;
+  -webkit-box-shadow: inset 0 0 3px #387bbe, 0 0 9px #387bbe;
+}
+
+
+input[type="range"] {
+  -webkit-appearance: none; 
+  appearance: none;
+  height: 10px;
+  width: 100%;
+  position: absolute;
+  background-color: #C6C6C6;
+  pointer-events: none;
+}
+
+#fromSlider3, #fromSlider2, #fromSlider1 {
+  height: 0;
+  z-index: 1;
+}
 
 @font-face {
     font-family: 'Lato';

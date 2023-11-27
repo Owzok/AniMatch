@@ -34,10 +34,10 @@ class ContentBasedRecommender:
         full_url = MAIN_PATH+f"{anime_id}.jpg"
         returnable_url = RETURNABLE_PATH+f"{anime_id}.jpg"
         if os.path.isfile(full_url):
-            print("si hay", anime_id)
+            #print("si hay", anime_id)
             return (anime_id, returnable_url)
         else:
-            print("no hay", anime_id)
+            #print("no hay", anime_id)
             url = "https://myanimelist.net/anime/"
             response = requests.get(url+str(anime_id))
             if response.status_code == 200:
@@ -113,7 +113,7 @@ class ContentBasedRecommender:
 
         return lst_id_url        
 
-    def recommend(self, title, k):
+    def recommend(self, title):
         n_id = self.get_id_from_title(title)
         if n_id is None:
             return []  # Anime not found
