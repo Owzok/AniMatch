@@ -6,6 +6,8 @@ __pycache__/
 node_modules/
 
 animelist.csv
+10k_users.csv
+useritem.pkl
 
 # C extensions
 *.so

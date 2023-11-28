@@ -28,8 +28,8 @@
   let toSlider3;
   let fromInput3;
   let toInput3;
-  let from_val3 = 1;
-  let to_val3 = 1000;
+  let from_val3 = 1970;
+  let to_val3 = 2023;
 
   const unsubscribe2 = anime_links.subscribe(value => {
     mal_images = value
@@ -423,7 +423,7 @@ async function generateImage() {
 
     toSlider1.value = 100; // Set the initial max value for Set 1
     toSlider2.value = 10;  // Set the initial max value for Set 2
-    toSlider3.value = 1000; // Set the initial max value for Set 3
+    toSlider3.value = 2023; // Set the initial max value for Set 3
     fillSlider(fromSlider3, toSlider3, '#C6C6C6', '#25daa5', toSlider3);
 
     return () => {
@@ -568,6 +568,11 @@ async function generateImage() {
         {desc}
     </p>
     <p class="Genres">{genres}</p>
+    <div class="thumbs">
+      <p>Do you find the recommendations useful? </p>
+      <img src="/icons/ThumbsUp.png" alt="thumbsup">
+      <img src="/icons/ThumbsDown.png" alt="thumbsdown">
+    </div>
     <a href="https://myanimelist.net/anime/{current_id}" target="_blank">
       <img src="/icons/mal-logo.jpeg" alt="MyAnimeList" class="mal-logo">
     </a>
@@ -656,8 +661,8 @@ async function generateImage() {
 
       <div class="range_container">
         <div class="sliders_control">
-          <input id="fromSlider3" type="range" value="1" min="1" max="999"/>
-          <input id="toSlider3" type="range" value="1000" min="2" max="1000"/>
+          <input id="fromSlider3" type="range" value="1970" min="1970" max="2022"/>
+          <input id="toSlider3" type="range" value="2023" min="1971" max="2023"/>
         </div>
         <div class="form_control">
           <p class="test" id="fromInput3">Year:</p>
@@ -687,36 +692,60 @@ async function generateImage() {
     <h2><b>Cinematic Gems</b> Tailored Just for You</h2>
     <div class="image-row-l">
       {#each movie_ids.slice(0, 6) as id (id)}
-        <img src={`../download/profiles/${id}.jpg`} alt="">
+        <img src={`../download/profiles/${id}.jpg`} alt="" on:click={() => handleClick(id)} on:keydown={(event) => handleKeyDown(event, id)}>
       {/each}
     </div>
     <h2><b>Binge-Worthy Short Stories:</b> Anime Under 13 Episodes</h2>
     <div class="image-row-l">
       {#each short_ids.slice(0, 6) as id (id)}
-        <img src={`../download/profiles/${id}.jpg`} alt="">
+        <img src={`../download/profiles/${id}.jpg`} alt="" on:click={() => handleClick(id)} on:keydown={(event) => handleKeyDown(event, id)}>
       {/each}
     </div>
     <h2><b>Epic Journeys Unfold:</b> Anime with 50+ Episodes</h2>
     <div class="image-row-l">
       {#each long_ids.slice(0, 6) as id (id)}
-        <img src={`../download/profiles/${id}.jpg`} alt="">
+        <img src={`../download/profiles/${id}.jpg`} alt="" on:click={() => handleClick(id)} on:keydown={(event) => handleKeyDown(event, id)}>
       {/each}
     </div>
     <h2><b>Timeless Classics:</b> Dive into the World of Vintage Anime</h2>
     <div class="image-row-l">
       {#each old_ids.slice(0, 6) as id (id)}
-        <img src={`../download/profiles/${id}.jpg`} alt="">
+        <img src={`../download/profiles/${id}.jpg`} alt="" on:click={() => handleClick(id)} on:keydown={(event) => handleKeyDown(event, id)}>
       {/each}
     </div>
     <h2><b>Fresh and Exciting:</b> Discover the Latest Anime Adventures</h2>
     <div class="image-row-l">
       {#each newer_ids.slice(0, 6) as id (id)}
-        <img src={`../download/profiles/${id}.jpg`} alt="">
+        <img src={`../download/profiles/${id}.jpg`} alt="" on:click={() => handleClick(id)} on:keydown={(event) => handleKeyDown(event, id)}>
       {/each}
     </div>
 </main>
 
 <style>
+
+.thumbs{
+  display: flex;
+}
+
+.thumbs p{
+  margin: 10px 0 10px 0;
+}
+
+.thumbs img{
+  width: 50px;
+  height: 50px;
+  margin-left: 20px;
+  opacity: 0.3;
+  transition: .3s;
+  cursor:pointer;
+}
+
+.thumbs img:hover{
+  opacity: 1;
+  rotate: 360deg;
+  width: 60px;
+  height: 60px;
+}
 
 .filter-btn{
   position: absolute;
@@ -896,7 +925,7 @@ input[type="range"] {
       margin: 0;
       margin-top: 10px;
       line-height: 50px;
-      max-width: 500px;
+      width: 700px;
       text-transform: uppercase;
   }
 

@@ -249,7 +249,7 @@ def get_info():
     data = request.json
     print(data)
     id = int(data.get('id'))
-    print("\n\n\n\n",id,"\n\n\n\n\n")
+    #print("\n\n\n\n",id,"\n\n\n\n\n")
 
     def get_length_text(id):
         x = synopsis.loc[id].sypnopsis.split(".")
@@ -319,7 +319,6 @@ def scrape_image():
             last_height = driver.execute_script('return document.body.scrollHeight')
             while True:
                 driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
-                time.sleep(SLEEP_TIME)
 
                 new_height = driver.execute_script('return document.body.scrollHeight')
                 try:
@@ -350,7 +349,7 @@ def scrape_image():
 
         box.send_keys(search_query+" anime imagesize:1920x1080 filetype:jpg OR filetype:png")
         box.send_keys(Keys.ENTER)
-        time.sleep(SLEEP_TIME)
+        time.sleep(0.5)
 
         #scroll_to_bottom()
         #time.sleep(SLEEP_TIME)
@@ -380,7 +379,7 @@ def scrape_image():
         for img_result in img_results:
             WebDriverWait(
                 driver,
-                    15
+                    5
                 ).until(
                     EC.element_to_be_clickable(
                         img_result
@@ -389,7 +388,7 @@ def scrape_image():
             img_result.click()
                 # Hasta aca entro, busco y dio click en la primera imagen
                 #print("zzzz")
-            time.sleep(SLEEP_TIME)
+            #time.sleep(SLEEP_TIME)
             time.sleep(SLEEP_TIME)
                 #time.sleep(100000)
 
@@ -399,7 +398,7 @@ def scrape_image():
             )
                 
             xpath = '/html/body/div[2]/c-wiz/div[3]/div[2]/div[3]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]'
-            wait = WebDriverWait(driver, 10)
+            wait = WebDriverWait(driver, 15)
 
             x = wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
 
