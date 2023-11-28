@@ -28,8 +28,8 @@
   let toSlider3;
   let fromInput3;
   let toInput3;
-  let from_val3 = 1970;
-  let to_val3 = 2023;
+  let from_val3 = 1;
+  let to_val3 = 1000;
 
   const unsubscribe2 = anime_links.subscribe(value => {
     mal_images = value
@@ -421,6 +421,10 @@ async function generateImage() {
     fromSlider3.oninput = () => controlFromSlider3(fromSlider3, toSlider3, fromInput3);
     toSlider3.oninput = () => controlFromSlider3(fromSlider3, toSlider3, fromInput3);
 
+    toSlider1.value = 100; // Set the initial max value for Set 1
+    toSlider2.value = 10;  // Set the initial max value for Set 2
+    toSlider3.value = 1000; // Set the initial max value for Set 3
+    fillSlider(fromSlider3, toSlider3, '#C6C6C6', '#25daa5', toSlider3);
 
     return () => {
       document.body.style.backgroundColor = ''; // or you can set it to the original color
@@ -521,19 +525,19 @@ async function generateImage() {
   }
 
   function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
-    const rangeDistance = to.max-to.min;
-    const fromPosition = from.value - to.min;
-    const toPosition = to.value - to.min;
+    const rangeDistance = to.max - to.min;
+    const fromPosition = (from.value - to.min) / rangeDistance * 100;
+    const toPosition = (to.value - to.min) / rangeDistance * 100;
+
     controlSlider.style.background = `linear-gradient(
       to right,
       ${sliderColor} 0%,
-      ${sliderColor} ${(fromPosition)/(rangeDistance)*100}%,
-      ${rangeColor} ${((fromPosition)/(rangeDistance))*100}%,
-      ${rangeColor} ${(toPosition)/(rangeDistance)*100}%, 
-      ${sliderColor} ${(toPosition)/(rangeDistance)*100}%, 
+      ${sliderColor} ${fromPosition}%,
+      ${rangeColor} ${fromPosition}%,
+      ${rangeColor} ${toPosition}%, 
+      ${sliderColor} ${toPosition}%,
       ${sliderColor} 100%)`;
   }
-
   function setToggleAccessible(currentTarget, toInput) {
     if (Number(toInput.value) <= 0) {
       currentTarget.style.zIndex = 2;
@@ -652,8 +656,8 @@ async function generateImage() {
 
       <div class="range_container">
         <div class="sliders_control">
-          <input id="fromSlider3" type="range" value="1970" min="1970" max="2022"/>
-          <input id="toSlider3" type="range" value="2022" min="1971" max="2023"/>
+          <input id="fromSlider3" type="range" value="1" min="1" max="999"/>
+          <input id="toSlider3" type="range" value="1000" min="2" max="1000"/>
         </div>
         <div class="form_control">
           <p class="test" id="fromInput3">Year:</p>
