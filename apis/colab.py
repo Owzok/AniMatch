@@ -25,10 +25,10 @@ import os
 import concurrent.futures
 from io import BytesIO
 
-NUM_COMPONENTS = 30
+NUM_COMPONENTS = 100
 MODEL_LOSS = "bpr"
-MODEL = "model_warp_1"
-DATASET = "dataset_save"
+MODEL = "model_bpr_100_2500000"
+DATASET = "dataset_save100_2500000"
 MAIN_PATH = "../public/download/profiles/"
 RETURNABLE_PATH = "../download/profiles/"
 
@@ -59,7 +59,6 @@ class ColaborativeRecommender:
         self.user_embeddings = self.model.get_user_representations()[1]
         self.item_biases = self.model.get_item_representations()[0]
         self.item_embeddings = self.model.get_item_representations()[1]
-        self.anime_titles = pd.read_csv("./data/anime_titles.csv")
         self.anime_titles = pd.read_csv("./data/anime_titles.csv")
 
     def get_anime_mapped(self, id_to_map):

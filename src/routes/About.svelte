@@ -609,7 +609,7 @@ async function generateImage() {
             {/each}
           </div>
           <div class="image-row-s">
-            {#each mal_data.slice(5, 11) as { url, id } (url)}
+            {#each mal_data.slice(5, 10) as { url, id } (url)}
             <img
               src={url}
               alt=""

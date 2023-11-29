@@ -262,11 +262,27 @@ def get_info():
             f_text.append(x[i])
             #print(m_len)
         return " ".join(str(item) for item in f_text)    
+    
+    try:
+        desc = get_length_text(id)
+        title = synopsis["Name"].loc[id]
+    except Exception as e:
+        desc = "Description not found"
+        title = ""
+    
+    if title:
+        fields = ['Type', 'Episodes', 'Studios', 'Rating', 'Genres']
+    else:
+        fields = ['Name', 'Type', 'Episodes', 'Studios', 'Rating', 'Genres']
 
-    desc = get_length_text(id)
-    fields = ['Name', 'Type', 'Episodes', 'Studios', 'Rating', 'Genres']
-    filtered_data = df.loc[id, fields]
-    result_dict = filtered_data.to_dict()
+    try:
+        filtered_data = df.loc[id, fields]
+        result_dict = filtered_data.to_dict()
+    except Exception as e:
+        result_dict = {"Name": "Not found", "Type": "", "Episodes": "-", "Studios": "Not found",
+                       "Rating": "Not found", "Genres": "Not found"}
+    if title:
+        result_dict["Name"] = title
     result_dict['synopsis'] = desc
     return jsonify(result_dict)
 
@@ -446,4 +462,4 @@ def filter_data():
     return jsonify(result_df['Id'][:10].values.tolist())
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
