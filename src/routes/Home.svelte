@@ -155,8 +155,8 @@
     <div class="navbar-links">
         <Link to="/"><p class=logo>AniMatch</p></Link>
         <Link to="about"><p class="navbar-link">About</p></Link>
-        <Link to="about"><p class="navbar-link">Credits</p></Link>
-        <Link to="about"><p class="navbar-link">FAQ</p></Link>
+        <Link to="credits"><p class="navbar-link">Credits</p></Link>
+        <Link to="faq"><p class="navbar-link">FAQ</p></Link>
         <p class="navbar-link inactive">Stats</p>
     </div>
 </nav>
