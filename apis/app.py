@@ -207,9 +207,21 @@ def get_anirec():
     if title is None:
         return jsonify({"error": "Invalid request. Make sure 'title' and 'k' are provided."}), 400
 
-    recommendations = cb.recommend_ten(title)
+    recommendations = cb.recommend(title)
 
-    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url} for anime_id, anime_image_url in recommendations]
+    lst_id_url = []
+    anime_id = [id for id, value in recommendations]
+    lst_url = get_lst_images(anime_id[:10])
+
+    for x in range(10):
+        animeid = anime_id[x]
+        lst_id_url.append((animeid, lst_url[animeid], str(recommendations[x])))
+
+    for x in (range(len(recommendations[10:]))):
+        animeid = anime_id[0]
+        lst_id_url.append((animeid, lst_url[animeid], str(recommendations[10 + x])))
+
+    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url, 'score': score} for anime_id, anime_image_url, score in lst_id_url]
     json_data = json.dumps(jsonifiable_data)
 
     return jsonify({"results": json_data})

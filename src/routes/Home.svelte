@@ -33,9 +33,11 @@
           const parsedResults = JSON.parse(json.results);
           const restOfUrls = parsedResults.map(entry => entry.anime_image_url);
           const anime_IDS = parsedResults.map(entry => entry.anime_id);
+          const for_filter = parsedResults.map(entry => entry.score);
 
+          anime_ids.set(parsedResults.map(entry => entry.anime_id));
           anime_links.set(restOfUrls);
-          anime_ids.set(anime_IDS);
+          all_data.set(for_filter);
 
           console.log("<animatch> Anime id:", anime_IDS);
           console.log("<animatch> Image urls:", restOfUrls);
@@ -61,28 +63,27 @@
         body: JSON.stringify({ username: inputValueValue }),
       });
       // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-      if(response.ok) {
-        const json = await response.json();
-        if ('results' in json) {
+      if (response.ok) {
+				const json = await response.json();
+        if ('results' in json){
           const parsedResults = JSON.parse(json.results);
-          const firstAnimeId = parsedResults[0].anime_id;
           const restOfUrls = parsedResults.map(entry => entry.anime_image_url);
+          const anime_IDS = parsedResults.map(entry => entry.anime_id);
           const for_filter = parsedResults.map(entry => entry.score);
 
-          // firstAnimeId <<store>>: ID of the best recommendation to then get its data
-          // restOfUrls <<store>>: image links of the other 9 recommendations to show
           anime_ids.set(parsedResults.map(entry => entry.anime_id));
           anime_links.set(restOfUrls);
           all_data.set(for_filter);
-          //console.log("<animatch> First anime id:", firstAnimeId);
-          //console.log("<animatch> Rest of the anime image urls:", restOfUrls);
-          // Navigation
-          navigate('/about');
+
+          console.log("<animatch> Anime id:", anime_IDS);
+          console.log("<animatch> Image urls:", restOfUrls);
         }
-      }
-    } catch (error) {
-      console.error('<animatch> Error', error)
-    }
+        // Navigation
+        navigate('/about');
+			}
+		} catch (error) {
+			console.error('<animatch> Error:', error);
+		}
   }
 
   function findMethod(){
