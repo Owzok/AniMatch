@@ -11,6 +11,7 @@ animelist.csv
 *.npy
 7hours/
 *.keras
+*.h5
 
 # C extensions
 *.so
