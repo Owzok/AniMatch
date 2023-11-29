@@ -154,25 +154,7 @@ class ContentBasedRecommender:
             anime_name = self.df[self.df['MAL_ID'] == anime_id]['Name'].values[0]
             recs.append(anime_name)
 
-            #print(f"---{anime_name}---")
-
-            #for sanime_id, score in num:
-            #    if sanime_id == anime_id:
-            #        print("Numerical", score)
-            #for sanime_id, score in cate:
-            #    if sanime_id == anime_id:
-            #        print("Categorical",score)
-            #for sanime_id, score in gen:
-            #    if sanime_id == anime_id:
-            #        print("Genre",score)
-            #for sanime_id, score in meta:
-            #    if sanime_id == anime_id:
-            #        print("Metadata",score)
-            #for sanime_id, score in stud:
-            #    if sanime_id == anime_id:
-            #        print("Studio",score)
-
         return recs
     
 #cb = ContentBasedRecommender()
-#print(cb.recommend_ten("Bungou Stray Dogs"))
+#print(cb.recommend("Bungou Stray Dogs"))

@@ -10,8 +10,8 @@
     <div>
 		<Route path="/" component={Home}/>
         <Route path="/about" component={About} />
-        <Route path="credits" component={Credits} />
-        <Route path="faq" component={FAQ} />
+        <Route path="/credits" component={Credits} />
+        <Route path="/faq" component={FAQ} />
         <!--<Route path="stats" component={Stats} />-->
     </div>
 </Router>
