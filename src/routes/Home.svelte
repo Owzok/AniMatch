@@ -9,6 +9,13 @@
   // Reactive variable, whenever inputValueValue changes, it also tries to.
   // $: is the reactive shorthand syntax of Svelte
 	$: disabled = inputValueValue === '';
+
+  function handleKeyDown(event) {
+    if (event.key === 'Enter') {
+      findMethod(); //Creditos: Marvin Avisror
+    }
+  }
+
   // Select which model to use, called inline by the div's onclick function
   function selectModel(modelId) {
     selectedModel = modelId;
@@ -153,9 +160,9 @@
   <nav class="navbar">
     <div class="navbar-links">
         <Link to="/"><p class=logo>AniMatch</p></Link>
-        <Link to="about"><p class="navbar-link">About</p></Link>
-        <Link to="about"><p class="navbar-link">Credits</p></Link>
-        <Link to="about"><p class="navbar-link">FAQ</p></Link>
+        <Link to="/about"><p class="navbar-link">About</p></Link>
+        <Link to="/credits"><p class="navbar-link">Credits</p></Link>
+        <Link to="/faq"><p class="navbar-link">FAQ</p></Link>
         <p class="navbar-link inactive">Stats</p>
     </div>
 </nav>
@@ -180,7 +187,9 @@
           <p class="lato-light">Discover personalized anime recommendations tailored to your preferences through your MAL profile or manually. Let us be your guide to a world of captivating new anime experiences.</p>
           <div class="input-wrapper">
             <div class="input-container">
-              <input type="text" class="lato-light rounded-left" placeholder={selectedModel === 'model2' ? 'Enter Anime Name' : 'Enter MyAnimeList Username'} bind:value={inputValueValue}>
+              <input type="text" class="lato-light rounded-left" placeholder={selectedModel === 'model2' ? 'Enter Anime Name' : 'Enter MyAnimeList Username'} 
+              bind:value={inputValueValue}
+              on:keydown={handleKeyDown}>
             </div>            
             <button class="search-button" type="submit" style="height: 40px" {disabled} on:click={findMethod}>
               <i class="fa fa-search"></i>
