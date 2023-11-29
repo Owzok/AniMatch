@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import tensorflow as tf
 
-MODEL = "7hours"
+MODEL = "model"
 
 def custom_loss(y_true, y_pred):
     weights = tf.where(tf.equal(y_true, 0), 0.1, 1.0)
@@ -21,7 +21,7 @@ def self_standarize_array(array):
 
 class DenoisingAutoEncoder:
     def __init__(self):
-        self.model = tf.keras.models.load_model(f"./models/{MODEL}.keras", custom_objects={'custom_loss': custom_loss})
+        self.model = tf.keras.models.load_model(f"./models/{MODEL}.h5", custom_objects={'custom_loss': custom_loss})
         self.df_ids = pd.read_csv("./data/10k.csv")
         print("model loaded !")
 
@@ -38,8 +38,12 @@ class DenoisingAutoEncoder:
 
         top_k_indices = [index for index, _ in sorted_ids]
         corresponding_ids = self.df_ids.iloc[top_k_indices] 
+        final = []
+        ids = corresponding_ids['Id'].values
+        for i in range(len(sorted_ids)):
+            final.append((ids[i],sorted_ids[i][1]))
 
-        return corresponding_ids[:10]['Id'].values
+        return final
 
-dae = DenoisingAutoEncoder()
-print(dae.recommend(pd.read_csv("../public/users/emijocab.csv"), 10))
+#dae = DenoisingAutoEncoder()
+#print(dae.recommend(pd.read_csv("../public/users/Owzok.csv"), 10))

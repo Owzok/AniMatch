@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify
 from model_content import ContentBasedRecommender
 from colab import ColaborativeRecommender
+from denoising import DenoisingAutoEncoder
 from flask_cors import CORS, cross_origin
 
 import ast 
@@ -36,6 +37,7 @@ app = Flask(__name__)
 CORS(app) 
 cb = ContentBasedRecommender()
 cf = ColaborativeRecommender()
+dcae = DenoisingAutoEncoder()
 
 cwd = os.getcwd()
 IMAGE_FOLDER = '../public/download/'
@@ -48,7 +50,7 @@ RETURNABLE_PATH = "../download/profiles/"
 
 try: 
     chrome_options = ChromeOptions()
-    chrome_options.add_argument("--headless")
+    #chrome_options.add_argument("--headless")
 
     #service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(
@@ -144,13 +146,42 @@ def get_recommendations():
     #Hacer todos los filtros en nuevo_df
 
     anime_titles =nuevo_df["Title"].tolist()
-    anime_id =nuevo_df.index
+    anime_id = nuevo_df.index
 
-    anime_id = anime_id
     anime_titles = anime_titles
     anime_id_ratings = anime_id_ratings
 
     lst_id_url = []
+    lst_url = get_lst_images(anime_id[:10])
+
+    for x in range(10):
+        animeid = anime_id[x]
+        lst_id_url.append((animeid, lst_url[animeid], str(anime_id_ratings[x])))
+
+    for x in (range(len(anime_id_ratings[10:]))):
+        animeid = anime_id[0]
+        lst_id_url.append((animeid, lst_url[animeid], str(anime_id_ratings[10 + x])))
+
+    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url, 'score': score} for anime_id, anime_image_url, score in lst_id_url]
+    json_data = json.dumps(jsonifiable_data)
+
+    return jsonify({ "results": json_data })
+
+@app.route('/recommendae', methods=['POST'])
+@cross_origin()
+def get_anirec_dcae():
+    data = request.json
+    username = data.get('username')
+
+    if not username:
+        return jsonify({"error": "<animatch> Invalid request. Make sure 'username' is provided."})
+
+    data_new_user = pd.read_csv(f"../public/users/{username}.csv")
+
+    anime_id_ratings = dcae.recommend(data_new_user)
+
+    lst_id_url = []
+    anime_id = [id for id, value in anime_id_ratings]
     lst_url = get_lst_images(anime_id[:10])
 
     for x in range(10):
@@ -349,7 +380,7 @@ def scrape_image():
 
         box.send_keys(search_query+" anime imagesize:1920x1080 filetype:jpg OR filetype:png")
         box.send_keys(Keys.ENTER)
-        time.sleep(0.5)
+        time.sleep(2)
 
         #scroll_to_bottom()
         #time.sleep(SLEEP_TIME)
@@ -379,7 +410,7 @@ def scrape_image():
         for img_result in img_results:
             WebDriverWait(
                 driver,
-                    5
+                    15
                 ).until(
                     EC.element_to_be_clickable(
                         img_result
@@ -388,16 +419,16 @@ def scrape_image():
             img_result.click()
                 # Hasta aca entro, busco y dio click en la primera imagen
                 #print("zzzz")
-            #time.sleep(SLEEP_TIME)
             time.sleep(SLEEP_TIME)
                 #time.sleep(100000)
 
-            actual_imgs = driver.find_element(
-                by=By.XPATH,
-                value='//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]'
-            )
+            #sactual_imgs = driver.find_element(
+            #    by=By.XPATH,
+            #    value='//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]'
+            #)
                 
-            xpath = '/html/body/div[2]/c-wiz/div[3]/div[2]/div[3]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]'
+            xpath = '//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div/div[3]/div[1]/a/img[1]'
+
             wait = WebDriverWait(driver, 15)
 
             x = wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))

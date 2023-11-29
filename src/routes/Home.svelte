@@ -49,11 +49,11 @@
 	}
 
   // Should be used when collaborative-filtering is selected or by default (model1)
-  async function collab() {
+  async function getrec(route) {
     try {
       showOverlay(`Searching user ${ inputValueValue }`)
       // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-      const response = await fetch('http://127.0.0.1:5000/recommend', {
+      const response = await fetch(`http://127.0.0.1:5000/${ route }`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,13 +88,15 @@
   function findMethod(){
     if(selectedModel === "model2"){
       anime_search();
+    } else if(selectedModel === "model1"){
+      searchMalUser("recommend");
     } else {
-      searchMalUser();
+      searchMalUser("recommendae");
     }
   }
 
   // Scrap user data from MAL
-  async function searchMalUser() {
+  async function searchMalUser(route) {
     // Checks first if the user data have'been already scrapped
     const filePath = `./users/${inputValueValue}.csv`;
     try {
@@ -104,7 +106,7 @@
         console.log("<animatch> File exists: good");  
         // If exists executes
         // await its necessary since collab has some fetch functions
-        await collab();
+        await getrec(route);
         //
       } else {
         showOverlay(`Retrieving data from ${ inputValueValue }`)
@@ -122,7 +124,7 @@
         if (response.ok) {
           console.log('<animatch> User scrapped successfully');
           // Execute
-          await collab();
+          await getrec(route);
           //
         } else {
           console.error(`<animatch> Error sending request: ${response.statusText}`);
