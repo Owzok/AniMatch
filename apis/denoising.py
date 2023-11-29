@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import tensorflow as tf
 
-MODEL = "model"
+MODEL = "autoencoder"
 
 def custom_loss(y_true, y_pred):
     weights = tf.where(tf.equal(y_true, 0), 0.1, 1.0)

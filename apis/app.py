@@ -447,7 +447,7 @@ def scrape_image():
             img_result.click()
                 # Hasta aca entro, busco y dio click en la primera imagen
                 #print("zzzz")
-            time.sleep(SLEEP_TIME)
+            time.sleep(6)
                 #time.sleep(100000)
 
             #sactual_imgs = driver.find_element(
