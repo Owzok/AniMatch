@@ -57,8 +57,8 @@ try:
         #service=service,
         options=chrome_options
     )
-except:
-    print("Machine is not Windows, cannot do webscraping !")
+except Exception as e:
+    print("Error with webscraping & ChromeDriver:",e)
 
 SLEEP_TIME = 1
 
@@ -77,7 +77,7 @@ def retrieve_id(title):
     return df['r'].idxmax()
 
 def do_filtering(data, min_score=1, max_score=10, min_episodes=1, max_episodes=10000, min_year=1970, max_year=2023):
-    if max_episodes == 100:
+    if max_episodes == 100: 
         max_episodes = 10000
     return data[(data['Score'] >= min_score) & (data['Score'] <= max_score) & (data['Episodes'] >= min_episodes) & (data['Episodes'] <= max_episodes) & (data['Year'] >= min_year) & (data['Year'] <= max_year) & (data['Year'] >= min_year)]
 
@@ -292,7 +292,6 @@ def get_info():
     data = request.json
     print(data)
     id = int(data.get('id'))
-    #print("\n\n\n\n",id,"\n\n\n\n\n")
 
     def get_length_text(id):
         x = synopsis.loc[id].sypnopsis.split(".")
@@ -314,16 +313,16 @@ def get_info():
         title = ""
     
     if title:
-        fields = ['Type', 'Episodes', 'Studios', 'Rating', 'Genres']
+        fields = ['Type', 'Episodes', 'Score', 'Members', 'Ranked', 'Genres']
     else:
-        fields = ['Name', 'Type', 'Episodes', 'Studios', 'Rating', 'Genres']
+        fields = ['Name', 'Type', 'Episodes', 'Score', 'Members' ,'Ranked', 'Genres']
 
     try:
         filtered_data = df.loc[id, fields]
         result_dict = filtered_data.to_dict()
     except Exception as e:
-        result_dict = {"Name": "Not found", "Type": "", "Episodes": "-", "Studios": "Not found",
-                       "Rating": "Not found", "Genres": "Not found"}
+        result_dict = {"Name": "Not found", "Type": "", "Episodes": "-", "Score": "-",
+                       "Members": "-", "Genres": "Not found"}
     if title:
         result_dict["Name"] = title
     result_dict['synopsis'] = desc
@@ -502,7 +501,7 @@ def filter_data():
     print(result_df)
     print(result_df['Id'].values)
     # You can return the result as JSON
-    return jsonify(result_df['Id'][:10].values.tolist())
+    return jsonify(result_df['Id'].values.tolist())
 
 if __name__ == '__main__':
     app.run(debug=False)
