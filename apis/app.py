@@ -40,6 +40,7 @@ cf = ColaborativeRecommender()
 dcae = DenoisingAutoEncoder()
 
 cwd = os.getcwd()
+
 IMAGE_FOLDER = '../public/download/'
 os.makedirs(
     name=f'{cwd}/{IMAGE_FOLDER}',
@@ -47,6 +48,7 @@ os.makedirs(
 )
 MAIN_PATH = "../public/download/profiles/"
 RETURNABLE_PATH = "../download/profiles/"
+SLEEP_TIME = 1
 
 try: 
     chrome_options = ChromeOptions()
@@ -60,11 +62,10 @@ try:
 except Exception as e:
     print("Error with webscraping & ChromeDriver:",e)
 
-SLEEP_TIME = 1
 
 df = pd.read_csv("./data/data_anime_clean.csv", index_col="Id")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
-data = pd.read_csv("./data/data4filter.csv")
+data = pd.read_csv("./data/data4filter2.csv")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
