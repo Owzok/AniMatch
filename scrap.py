@@ -3,17 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-
 with open("./animes_ids.txt", "r") as file:
     # Read the content of the file and split it into lines
     lines = file.read().split('\n')
 
 url = "https://myanimelist.net/anime/"
 
-
-
 df_animes = []
-
 
 #if the for fails, save the data frame file 
 for x in range(len(df)):

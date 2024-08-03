@@ -50,7 +50,7 @@ RETURNABLE_PATH = "../download/profiles/"
 
 try: 
     chrome_options = ChromeOptions()
-    #chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
 
     #service = ChromeService(ChromeDriverManager().install())
     driver = webdriver.Chrome(
@@ -64,7 +64,7 @@ SLEEP_TIME = 1
 
 df = pd.read_csv("./data/data_anime_clean.csv", index_col="Id")
 synopsis = pd.read_csv("./data/anime_with_synopsis.csv", index_col="MAL_ID")
-data = pd.read_csv("./data/data4filter.csv")
+data = pd.read_csv("./data/data4filter2.csv")
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -76,20 +76,19 @@ def retrieve_id(title):
     df['r'] = df.apply(lambda x: similar(x.Name, title), axis=1)
     return df['r'].idxmax()
 
-def do_filtering(data, min_score=1, max_score=10, min_episodes=1, max_episodes=10000, min_year=1970, max_year=2023):
+def do_filtering(data, min_score=1, max_score=10, min_episodes=1, max_episodes=10000, min_year=1970, max_year=2023, prequels=False, mature=False):
     if max_episodes == 100: 
         max_episodes = 10000
-    return data[(data['Score'] >= min_score) & (data['Score'] <= max_score) & (data['Episodes'] >= min_episodes) & (data['Episodes'] <= max_episodes) & (data['Year'] >= min_year) & (data['Year'] <= max_year) & (data['Year'] >= min_year)]
-
+    return data[(data['Score'] >= min_score) & (data['Score'] <= max_score) & (data['Episodes'] >= min_episodes) & (data['Episodes'] <= max_episodes) & (data['Year'] >= min_year) & (data['Year'] <= max_year) & (data['Year'] >= min_year) & ((data['Prequel'] == int(prequels)) | (data['Prequel'] == 0)) & ((data['Hentai'] == int(mature)) | (data['Hentai'] == 0))]
 
 def save_image(anime_id):
     full_url = MAIN_PATH+f"{anime_id}.jpg"
     returnable_url = RETURNABLE_PATH+f"{anime_id}.jpg"
     if os.path.isfile(full_url):
-        print("si hay", anime_id)
+        #print("si hay", anime_id)
         return (anime_id, returnable_url)
     else:
-        print("no hay", anime_id)
+        #print("no hay", anime_id)
         url = "https://myanimelist.net/anime/"
         response = requests.get(url+str(anime_id))
         if response.status_code == 200:
@@ -167,6 +166,46 @@ def get_recommendations():
 
     return jsonify({ "results": json_data })
 
+@app.route("/interec", methods=['POST'])
+def get_inter_rec():
+    data = request.json
+    user_ids = data.get('user_ids')
+    anime_ids = list(map(int, data.get('anime_ids')))  
+    ratings = list(map(int, data.get('ratings')))  
+
+    if not anime_ids or not ratings or len(ratings) != len(anime_ids):
+        return jsonify({"error": "<animatch> Invalid request. Make sure 'username' is provided."})
+    
+    data_inter_user = pd.DataFrame({
+        'user_id': [141532434 for i in range(len(anime_ids))],
+        'anime_id': anime_ids,
+        'rating': ratings
+    })
+
+    print("Data for /interec:")
+    print(data_inter_user)
+
+    anime_id_ratings = dcae.recommend(data_inter_user)
+    print("GAAAAAAAA /interec")
+    print(anime_id_ratings[:20])
+
+    lst_id_url = []
+    anime_id = [id for id, value in anime_id_ratings]
+    lst_url = get_lst_images(anime_id[:10])
+
+    for x in range(10):
+        animeid = anime_id[x]
+        lst_id_url.append((animeid, lst_url[animeid], str(anime_id_ratings[x])))
+
+    for x in (range(len(anime_id_ratings[10:]))):
+        animeid = anime_id[0]
+        lst_id_url.append((animeid, lst_url[animeid], str(anime_id_ratings[10 + x])))
+
+    jsonifiable_data = [{'anime_id': int(anime_id), 'anime_image_url': anime_image_url, 'score': score} for anime_id, anime_image_url, score in lst_id_url]
+    json_data = json.dumps(jsonifiable_data)
+
+    return jsonify({ "results": json_data })
+
 @app.route('/recommendae', methods=['POST'])
 @cross_origin()
 def get_anirec_dcae():
@@ -178,7 +217,12 @@ def get_anirec_dcae():
 
     data_new_user = pd.read_csv(f"../public/users/{username}.csv")
 
+    print("Data for /recommendae:")
+    print(data_new_user)
+
     anime_id_ratings = dcae.recommend(data_new_user)
+    print("GAAAAAAAA /recommendae")
+    print(anime_id_ratings[:20])
 
     lst_id_url = []
     anime_id = [id for id, value in anime_id_ratings]
@@ -290,7 +334,7 @@ def get_id():
 @app.route('/get_info', methods=['POST'])
 def get_info():
     data = request.json
-    print(data)
+    #print(data)
     id = int(data.get('id'))
 
     def get_length_text(id):
@@ -489,19 +533,21 @@ def filter_data():
     max_episodes = int(content.get('max_episodes', 10000))
     min_year = int(content.get('min_year', 1970))
     max_year = int(content.get('max_year', 2023))
+    prequels = int(content.get('prequel', 0))
+    mature = int(content.get('mature', 0))
+
     fetched_data_str = content.get('fetched_data', [])
     fetched_data = [ast.literal_eval(item) for item in fetched_data_str]
     df = pd.DataFrame(fetched_data, columns=['Id', 'model_score'])
-
     final_df = pd.merge(df, data, on="Id")
 
-    filtered_data = do_filtering(final_df, min_score=min_score, max_score=max_score, min_episodes=min_episodes, max_episodes=max_episodes, min_year=min_year, max_year=max_year)
+    filtered_data = do_filtering(final_df, min_score=min_score, max_score=max_score, min_episodes=min_episodes, max_episodes=max_episodes, min_year=min_year, max_year=max_year, prequels=prequels, mature=mature)
 
     result_df = pd.DataFrame(filtered_data)
-    print(result_df)
-    print(result_df['Id'].values)
+    #print(result_df)
+    #print(result_df['Id'].values)
     # You can return the result as JSON
     return jsonify(result_df['Id'].values.tolist())
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
