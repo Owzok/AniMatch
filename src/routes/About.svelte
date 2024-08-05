@@ -239,8 +239,8 @@
           max_episodes: to_val1,
           min_year: from_val3,
           max_year: to_val3,
-          mature: togglerStates[0],
-          prequel: togglerStates[2],
+          mature: togglerStates[2],
+          prequel: togglerStates[0],
           fetched_data: fetched_data
         }),
       });
@@ -1530,7 +1530,7 @@
   }
 
   .image-container img {
-    width: 80%; /* Adjust the image width as needed */
+    width: 70%; /* Adjust the image width as needed */
     float: right;
     /*margin-top: -60px;*/
   }
@@ -1542,7 +1542,7 @@
     right: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(15,15,15,1) 20%, rgba(15,15,15,0.6685267857142857) 30%, rgba(0,0,0,0) 50%);
+    background: linear-gradient(90deg, rgba(15,15,15,1) 30%, rgba(15,15,15,0.6685267857142857) 40%, rgba(0,0,0,0) 50%);
     pointer-events: none;
   }
 

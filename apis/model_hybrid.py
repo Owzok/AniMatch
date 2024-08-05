@@ -32,17 +32,17 @@ class HybridRecommender:
         
         return recs
 
-cb = ContentBasedRecommender()
-cl = ColaborativeRecommender()
-data_new_user = pd.read_csv("./new_user.csv")
+#cb = ContentBasedRecommender()
+#cl = ColaborativeRecommender()
+#data_new_user = pd.read_csv("./new_user.csv")
 
-hr = HybridRecommender(cl, cb)
+#hr = HybridRecommender(cl, cb)
 
-titles = hr.recommend(data_new_user, "Serial Experiments Lain", 0.1)
-print(titles)
+#titles = hr.recommend(data_new_user, "Serial Experiments Lain", 0.1)
+#print(titles)
 
-titles = hr.recommend(data_new_user, "Serial Experiments Lain", 0.5)
-print(titles)
+#titles = hr.recommend(data_new_user, "Serial Experiments Lain", 0.5)
+#print(titles)
 
-titles = hr.recommend(data_new_user, "Serial Experiments Lain", 1)
-print(titles)
+#titles = hr.recommend(data_new_user, "Serial Experiments Lain", 1)
+#print(titles)

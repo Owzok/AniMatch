@@ -86,7 +86,7 @@ class ColaborativeRecommender:
         full_url = MAIN_PATH+f"{anime_id}.jpg"
         returnable_url = RETURNABLE_PATH+f"{anime_id}.jpg"
         if os.path.isfile(full_url):
-            print("si hay", anime_id)
+            #print("si hay", anime_id)
             return (anime_id, returnable_url)
         else:
             print("no hay", anime_id)
