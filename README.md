@@ -104,3 +104,14 @@ We welcome contributions from the community. If you'd like to contribute to AniM
 This project is licensed under the MIT License.
 
 Thank you for using AniMatch!
+
+> TODO:
+
+- [ I ] Change Members to popularity ranking of MAL
+- [ I ] Remove Episodes when movie, instead add director idk
+- [ I ] Implement menu
+- [ I ] Again, split studios by comma
+
+- Make menu work
+- Add useful feedback button
+- Add sound effects, *adds a nice touch c:*
