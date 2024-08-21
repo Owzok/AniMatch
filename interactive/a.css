@@ -22,7 +22,6 @@ body {
 header {
     text-align: center;
     padding: 20px 0;
-    background: #131313;
 }
 
 .instruction {
@@ -64,7 +63,7 @@ header {
 /* === Container Left - Selected Shows === */
 
 .selected-anime-container {
-    background: #131313;
+    background: #2c2c2c;
     padding: 20px;
     border-radius: 10px;
     width: 100%;
@@ -84,12 +83,13 @@ header {
     transition: 0.3s;
 }
     .selected-anime:hover {
-        color: #394045; /* Slightly lighter on hover */
         transform: scale(1.1);
+        text-shadow: white 2px 0 15px;
     }
     .selected-anime p {
-        margin: 0;
-        font-size: 14px;
+        margin-left: 11px;
+        font-size: 18px;
+        letter-spacing: 2px;
     }
 
 .rating-amazing { background-color: #50bb2c; box-shadow: 0px 0px 15px #50bb2c; }

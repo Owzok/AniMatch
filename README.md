@@ -111,6 +111,9 @@ Thank you for using AniMatch!
 - [ I ] Remove Episodes when movie, instead add director idk
 - [ I ] Implement menu
 - [ I ] Again, split studios by comma
+- [ I ] l-c -> <- r-c
+- [ I ] Titulo
+- [ I ] light theme
 
 - Make menu work
 - Add useful feedback button
