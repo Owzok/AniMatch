@@ -6,61 +6,75 @@
     <link rel="stylesheet" href="a.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
     <header style="font-size: 40px; color: white; font-weight: 100;">
         <b>AniMatch</b> Interactive Recommender
     </header>
-    <p class="instruction">Rate some anime you've seen to get recommendations. The more you rate, the better the recommendations will be!</p>
+    <p id="instruction" class="instruction">Rate 5 more shows to get recommendations. The more you rate, the better the recommendations will be!</p>
     <div class="container">
-        <div class="c-middle">
-          <div id="selected-anime-container" class="selected-anime-container"></div>
-        </div>
-        <div class="c-left">
-          <div class="right">
-            <button class="btn amazing">Amazing</button>
-            <button class="btn good">Good</button>
-            <button class="btn meh">Meh</button>
-            <button class="btn bad">Bad</button>
-        </div>
-          <div class="wrapper">
-              <div class="search-input">
-                  <a href="" target="_blank" hidden></a>
-                  <input type="text" placeholder="Type to search..">
-                  <div class="autocom-box">
-                      <!-- here titles are inserted from js file -->
-                  </div>
-                  <div class="icon"><i class="fas fa-search"></i></div>
-              </div>
-              <div class="info">
-                  <div class="animu">
-                      <div class="left">
-                          <img id="anime-img" src="../public/download/profiles/1.jpg" alt="Anime Image">
-                      </div>
-                      <div class="anime-info">
-                        <h1 id="anime-title">Title</h1>
-                        <ul class="">
-                          <li style="font-size:22px;"><p>SCORE</p><b id="anime-rating">8.65</b</li>
-                          <li style="font-size:20px;"><p>Members</p>500k</li>
-                          <li style="font-size:20px;"><p>Episodes</p>Movie</li>
-                        </ul>
-                        <p class="p desc"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit laboriosam molestiae neque, libero vero dolore autem explicabo fuga quod alias voluptatibus beatae provident necessitatibus, ipsam distinctio repellendus veritatis facere error.</p>
-                        <p class="Genres"><span id="anime-genres"></span></p>
-                      </div>
-                  </div>
-                  <div class="submit">
-                      <button>Submit</button>
-                  </div>
-              </div>
-          </div>
-        </div>
-      </div>
-      </div>
-        
-    </div>
-    <div class="recommendations">
 
+        <div class="container-left">
+
+            <p style="margin-left: 15px;">Selected Shows:</p>
+            <div id="selected-anime-container" class="selected-anime-container"></div>
+
+        </div>
+        <div class="container-right">
+
+            <div class="b-container">
+                <a class="button amazing" href="#" style="--color: #50bb2c;">Amazing</a>
+                <a class="button good" href="#" style="--color:#7ea80b;">Good</a>
+                <a class="button meh" href="#" style="--color:#c09426;">Meh</a>
+                <a class="button bad" href="#" style="--color: #ff1867;">Bad</a>
+            </div>
+
+            <div class="wrapper">
+
+                <div class="search-input">
+                    <a href="" target="_blank" hidden></a>
+                    <input type="text" placeholder="Type to search..">
+                    <div class="autocom-box"></div>
+                </div>
+
+                <div class="container-info" id="anime-bg">
+                    <div class="animu">
+                      
+                        <div class="anime-img">
+                            <img id="anime-img" src="../public/download/profiles/1.jpg" alt="Anime Image" style="box-shadow: 0px 0px 35px black">
+                        </div>
+
+                        <div class="anime-info">
+
+                              <h1 id="anime-title">Title</h1>
+                              <ul class="metadata">
+                                  <li ><p>Score</p><b id="anime-rating">8.65</b></li>
+                                  <li ><p>Members</p><b id="anime-members"></b></li>
+                                  <li ><p>Type</p><b id="anime-type"></b></li>
+                                  <li ><p>Episodes</p><b id="anime-episodes"></b></li>
+                                  <li ><p>Studio</p><b id="anime-studios"></b></li>
+                              </ul>
+
+                              <div class="desc-container">
+                                  <p id="anime-synopsis"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit laboriosam molestiae neque, libero vero dolore autem explicabo fuga quod alias voluptatibus beatae provident necessitatibus, ipsam distinctio repellendus veritatis facere error.</p>
+                              </div>
+
+                              <div class="genre-container">
+                                  <p class="Genres" id="anime-genres"></p>
+                              </div>
+
+                        </div>
+
+                    </div>
+                    <div class="submit"><button>Submit</button></div>
+              </div>
+        </div>
+      </div>
     </div>
+    
+    <div class="recommendations"></div>
+
     <input type="hidden" id="user-id">
     <script src="a.js"></script>
 </body>

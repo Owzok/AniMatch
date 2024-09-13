@@ -86,7 +86,7 @@
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
         title = data.Name;
         episodes = data.Episodes;
         if (episodes === '1'){
@@ -99,7 +99,7 @@
         ranked = data.Ranked;
         genres = data.Genres;
         genresArray = genres.split(',').map(genre => genre.trim());
-        console.log(genresArray);
+        //console.log(genresArray);
       } else {
         console.error('Failed to fetch data');
       }
@@ -124,7 +124,7 @@
       if (response.ok) {
         const filteredData = await response.json();
 
-        console.log('Filtered Data:', filteredData);
+        //console.log('Filtered Data:', filteredData);
         movie_ids = filteredData;
         
         await fetch('http://127.0.0.1:5000/profile_pics', {
@@ -146,7 +146,7 @@
       if (response.ok) {
         const filteredData = await response.json();
 
-        console.log('Filtered Data:', filteredData);
+        //console.log('Filtered Data:', filteredData);
         short_ids = filteredData;
         
         await fetch('http://127.0.0.1:5000/profile_pics', {
@@ -169,7 +169,7 @@
       if (response.ok) {
         const filteredData = await response.json();
 
-        console.log('Filtered Data:', filteredData);
+        //console.log('Filtered Data:', filteredData);
         long_ids = filteredData;
         
         await fetch('http://127.0.0.1:5000/profile_pics', {
@@ -192,7 +192,7 @@
       if (response.ok) {
         const filteredData = await response.json();
 
-        console.log('Filtered Data:', filteredData);
+        //console.log('Filtered Data:', filteredData);
         old_ids = filteredData;
         
         await fetch('http://127.0.0.1:5000/profile_pics', {
@@ -215,7 +215,7 @@
       if (response.ok) {
         const filteredData = await response.json();
 
-        console.log('Filtered Data:', filteredData);
+        //console.log('Filtered Data:', filteredData);
         newer_ids = filteredData;
         
         await fetch('http://127.0.0.1:5000/profile_pics', {
@@ -248,7 +248,7 @@
       if (response.ok) {
         const filteredData = await response.json();
 
-        console.log('Filtered Data:', filteredData);
+        //console.log('Filtered Data:', filteredData);
         filtered_ids = filteredData;
         
         await fetch('http://127.0.0.1:5000/profile_pics', {
@@ -281,13 +281,13 @@
         });
 
         if (response.ok) {
-          console.log("Answered!");
+          //console.log("Answered!");
           const responseData = await response.json();
 
           if (responseData.success) {
             imageExists = true;
             imageSrc = `/download/${current_id}.jpg`;
-            console.log(imageExists);
+            //console.log(imageExists);
           } else {
             console.error('API request was not successful:', responseData.error);
           }
@@ -311,6 +311,10 @@
     choiceElements2 = document.querySelectorAll('.choice-el2');
 
     toggleContainers = document.querySelectorAll('.container-toggle');
+
+    ranked_spot = document.querySelector('#ranked-spot');
+    console.log("rs", ranked_spot);
+
     togglerStates = Array.from(toggleContainers, container => {
       return container.querySelector('.slider').classList.contains('sl-toggled');
     });
@@ -513,13 +517,11 @@
 
   function showNextCinematicGems() {
     currentIndexCinematicGems += moviesPerPageCinematicGems;
-    console.log("NEXT");
     updateImageDisplayCinematicGems();
   }
 
   function showPrevCinematicGems() {
     currentIndexCinematicGems -= moviesPerPageCinematicGems;
-    console.log("PREV");
     updateImageDisplayCinematicGems();
   }
 
@@ -537,13 +539,13 @@
 
   function showNextShortStories() {
     currentIndexShortStories += moviesPerPageShortStories;
-    console.log("NEXT");
+    //console.log("NEXT");
     updateImageDisplayShortStories();
   }
 
   function showPrevShortStories() {
     currentIndexShortStories -= moviesPerPageShortStories;
-    console.log("PREV");
+    //console.log("PREV");
     updateImageDisplayShortStories();
   }
 
@@ -881,7 +883,7 @@
     {/if}
 </div>
   <div class="info">
-    <p class="p best">Ranked #<b style="font-size:18px;">{ranked}</b> on MAL</p>
+    <p class="p best">Ranked #<b style="font-size:18px;" id="ranked-spot">{ranked}</b> on MAL</p>
     <h1>{title}</h1>
     <ul>
         <li class='li' style="font-size:22px;"><p class='p' style="font-size:14px;">SCORE</p>{score}</li>
