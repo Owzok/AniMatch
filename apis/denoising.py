@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 MODEL = "autoencoder"
-
+#funciona tf v.15,  tf version 2.17 muere! probar 2.16. y ver si se puede reentrenar o updatear para tf 2.17
 def custom_loss(y_true, y_pred):
     weights = tf.where(tf.equal(y_true, 0), 0.1, 1.0)
     loss = tf.reduce_sum(tf.square(y_true - y_pred) * weights) / tf.reduce_sum(weights)
