@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start AniMatch Backend",
+        "type": "shell",
+        "command": "cd C:/Users/dguer/Desktop/Coding/Proyectos/AniMatch/backend/apis && conda activate mainds && python app.py",
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "problemMatcher": [],
+        "group": {
+          "kind": "build"
+        }
+      },
+      {
+        "label": "Start AniMatch Frontend",
+        "type": "shell",
+        "command": "cd C:/Users/dguer/Desktop/Coding/Proyectos/AniMatch/frontend && npm run dev",
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "problemMatcher": [],
+        "group": {
+          "kind": "build"
+        }
+      }
+    ]
+  }
+  
